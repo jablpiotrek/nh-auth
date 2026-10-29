@@ -27,7 +27,9 @@ own E/F baseline plus `I` (import sorting), `UP` (modernize syntax), `B`
 
 Commands: `uv run ruff check --fix .`, then `uv run ruff format .` (fix
 before format - Ruff's own documented order, since fixes can change what
-needs reformatting).
+needs reformatting). Python/`uv` has no built-in equivalent of npm
+`scripts`, so a `Makefile` provides the short aliases instead:
+`make lint`, `make lint-fix`, `make format`, `make format-check`.
 
 **Pre-commit hook**: extends the same root `.husky/pre-commit` used by
 `front/` (one hook system for the whole repo, rather than also adopting
