@@ -30,6 +30,19 @@ them separately.
 Because the two apps deploy to different domains, cross-origin requests
 (cookies, CORS) matter — see `back/CLAUDE.md` for the auth cookie contract.
 
+## Root `package.json`
+
+Exists only to host `husky` for git hooks (hooks are inherently
+repo-wide — there's one `.git` — unlike build/task tooling, which stays
+per-app). This is **not** a monorepo build tool and doesn't contradict the
+"no Turborepo/Nx" decision above; it has no scripts for building or
+running either app.
+
+`.husky/pre-commit` currently only acts on `front/` (checks staged paths,
+then runs `front/`'s own `lint-staged` config from inside `front/`) since
+`back/` has no lint/format stack yet. Extend the hook similarly once it
+does.
+
 ## Status
 
 Both apps are currently empty working scaffolds (they start and do

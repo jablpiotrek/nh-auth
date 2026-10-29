@@ -47,7 +47,7 @@ app-specific pages or components exist yet beyond Nuxt's default
   and can change without notice).
 - **Undeclared dependency quirk**: `@nordhealth/css`'s Tailwind entry point
   (`@nordhealth/css/tailwind`) imports from `@nordhealth/tokens`, but that
-  package is only listed as a *devDependency* of `@nordhealth/css` (used to
+  package is only listed as a _devDependency_ of `@nordhealth/css` (used to
   build it), not a runtime dependency — so it doesn't get installed
   automatically and the build fails resolving it. Fix: install
   `@nordhealth/tokens` directly as our own dependency. If a future
@@ -59,6 +59,23 @@ app-specific pages or components exist yet beyond Nuxt's default
   `npx skills add https://nordhealth.design`. Gives any AI agent working in
   `front/` structured knowledge of Nord's components, tokens, and
   conventions without re-deriving them from the live docs each time.
+
+## Lint & format
+
+- **ESLint** (`@nuxt/eslint`) = code quality/correctness only. **Prettier**
+  = all formatting — including `prettier-plugin-tailwindcss`, which
+  auto-sorts utility classes, important here since elements mix plain
+  Tailwind utilities with Nord's `n:`-prefixed ones.
+  `eslint-config-prettier` is applied last in `eslint.config.mjs` to turn
+  off any ESLint stylistic rules that would otherwise fight Prettier.
+- Scripts: `npm run lint` / `lint:fix`, `npm run format` / `format:check`.
+- **Pre-commit hook** (husky, configured at the repo root since git hooks
+  are repo-wide): on any commit touching `front/`, runs `npx lint-staged`
+  from inside `front/` (via `lint-staged` config in `front/package.json`),
+  which Prettier-formats and ESLint-fixes staged files and re-stages the
+  result. A real lint error (not just a formatting issue) blocks the
+  commit and safely reverts any partial changes — verified by hand before
+  relying on it.
 
 ## Auth contract (for when the real pages land)
 
