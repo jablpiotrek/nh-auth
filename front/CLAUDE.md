@@ -8,7 +8,11 @@ context.
 
 Empty working scaffold: Nuxt + CSR + Nord + Tailwind are fully wired and
 verified (build succeeds, served HTML is an empty CSR shell, bundled CSS
-contains Nord/Tailwind tokens, bundled JS registers `nord-*` elements). No
+contains Nord/Tailwind tokens, bundled JS registers `nord-*` elements).
+`@pinia/nuxt` is installed and registered as a module (build verified) -
+**no store exists yet**. The planned `auth` store (state: access token
+in memory, maybe current user; actions: login/register/logout/refresh;
+getters as needed) comes with the real auth pages, not before. No
 app-specific pages or components exist yet beyond Nuxt's default
 `NuxtWelcome` — those come next.
 
@@ -81,6 +85,14 @@ app-specific pages or components exist yet beyond Nuxt's default
     case-sensitive typed routing, Vite 8/Rolldown). Cross-check anything
     version-sensitive against our actual installed Nuxt version before
     trusting it.
+
+- **State management: Pinia**, installed as the official Nuxt module
+  (`npx nuxi module add pinia`, which adds `@pinia/nuxt` to
+  `nuxt.config.ts`'s `modules` array) rather than a hand-written plugin —
+  the module handles registration itself. Also installed `pinia` directly
+  and `@vue/devtools-api` (a required peer dependency as of Pinia v4).
+  `defineStore`/`storeToRefs`/etc. are auto-imported; any store placed in
+  `app/stores/` would be auto-imported too, once one exists.
 
 ## Lint & format
 
