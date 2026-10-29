@@ -1,7 +1,13 @@
-.PHONY: dev lint lint-fix format format-check
+.PHONY: dev db-up db-down lint lint-fix format format-check
 
 dev:
 	uv run uvicorn app.main:app --reload
+
+db-up:
+	docker compose up -d
+
+db-down:
+	docker compose down
 
 lint:
 	uv run ruff check .

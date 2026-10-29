@@ -42,6 +42,24 @@ exits non-zero and the commit is blocked, leaving the partial fix
 unstaged for manual review - verified by hand for both the clean-autofix
 and blocked-on-real-error cases.
 
+## Database: local Postgres for dev, cloud only for the deployed app
+
+**Local dev and anyone reviewing this repo use Postgres via Docker Compose**
+(`back/docker-compose.yml`, `make db-up` / `make db-down`), *not* a cloud
+database. This was a deliberate reversal of an earlier plan to use a cloud
+Postgres (Neon) for local dev too — a reviewer cloning this repo has no way
+to get a working `DATABASE_URL` for someone else's cloud database, and a
+project that doesn't start without a secret the reviewer doesn't have fails
+the actual goal of this kata. `back/.env.example` reflects this:
+`DATABASE_URL=postgresql+asyncpg://nh_auth:nh_auth@localhost:5432/nh_auth`
+(trivial, non-secret credentials — this is a disposable local container,
+not anything resembling production data).
+
+**Cloud Postgres (Neon) is reserved for the actually-deployed backend**
+once `back/` is live on Railway/Render: `DATABASE_URL` set as an
+environment variable in that platform's own dashboard, never committed
+here, never needed to run or review this repo locally.
+
 ## Library choices (and why, so they don't get silently "improved" back)
 
 - **Hashing: `argon2-cffi`** directly. *Not* `passlib` — unmaintained
