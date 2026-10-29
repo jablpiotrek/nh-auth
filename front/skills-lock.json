@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "skills": {
+    "nord": {
+      "source": "nordhealth.design",
+      "sourceUrl": "https://nordhealth.design",
+      "sourceType": "well-known",
+      "computedHash": "f42b88d27127bb225192df5487ced6bbf599a59f30e49be6cfbb4e031e6341ed",
+      "wellKnownDigest": "sha256:95be60a2cdcfe04b1454fdf40e82d0e0460b1247d1e601961004ba503b3d91ea"
+    },
+    "nord-full": {
+      "source": "nordhealth.design",
+      "sourceUrl": "https://nordhealth.design",
+      "sourceType": "well-known",
+      "computedHash": "6b2d017d31a978c73f2578dbd70b1b713f8265554f4ce65f9a1b35c5808f5e0b",
+      "wellKnownDigest": "sha256:9b82e211dcfa3fbf1738bb250875dd8457204def99929a8929a356a197a854c8"
+    }
+  }
+}
