@@ -13,6 +13,9 @@ the reasoning behind it.
   version and dependencies itself; you don't need Python installed
   separately
 - **Docker** and **Docker Compose** — runs local Postgres for the backend
+- **make** — runs the backend's dev/lint/format aliases (`back/Makefile`).
+  Usually already present on Linux/macOS dev setups; if not, install via
+  your package manager (e.g. `apt install make`, `brew install make`)
 
 ## Running locally
 
