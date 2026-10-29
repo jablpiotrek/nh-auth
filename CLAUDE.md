@@ -44,6 +44,13 @@ changes run `lint-staged` (ESLint + Prettier) from inside `front/`;
 One hook system for the whole repo, even though each app's actual
 lint/format tooling is entirely separate (npm-based vs. Ruff/uv-based).
 
+## Git workflow
+
+Agents (Claude Code or otherwise) must **never push to the remote** —
+`git fetch` is fine, but `git push` (including to a feature branch) is
+reserved for the user. Commit locally as normal; leave pushing to the
+person running the session.
+
 ## Status
 
 Both apps are currently empty working scaffolds (they start and do
