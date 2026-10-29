@@ -11,6 +11,15 @@ export default defineNuxtConfig({
 
   css: ["~/assets/css/main.css"],
 
+  runtimeConfig: {
+    public: {
+      // NUXT_PUBLIC_API_BASE_URL - back/'s base URL. Different per
+      // environment (local Uvicorn vs the deployed Render URL), so no
+      // default here beyond local dev's.
+      apiBaseUrl: "http://localhost:8000",
+    },
+  },
+
   vite: {
     plugins: [tailwindcss()],
   },
