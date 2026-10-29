@@ -59,6 +59,28 @@ app-specific pages or components exist yet beyond Nuxt's default
   `npx skills add https://nordhealth.design`. Gives any AI agent working in
   `front/` structured knowledge of Nord's components, tokens, and
   conventions without re-deriving them from the live docs each time.
+- **`antfu/skills`** (Anthony Fu - core Vue/Nuxt/Vite maintainer, also the
+  author of `@nuxt/eslint` which we already depend on) installed the same
+  way, but pruned down to `nitro`, `nuxt`, `pinia`, `vite`, `vitest`, `vue`.
+  Removed from the full collection, and why:
+  - `unocss` - we use Tailwind, not UnoCSS; keeping it risked the AI
+    suggesting UnoCSS utility patterns instead.
+  - `pnpm` - we use npm.
+  - `vitepress` - we're not building a docs site.
+  - `antfu-create-pr` / `antfu-issue-triage` - his own GitHub workflow
+    automation, unrelated to framework knowledge.
+  - `antfu` (the general one) - not just framework reference: it pushes
+    `@antfu/eslint-config` as a _Prettier replacement_ and recommends
+    disabling Nuxt auto-imports entirely. Both directly contradict the
+    ESLint+Prettier setup and ordinary auto-import usage we already built
+    and tested - removed to avoid the AI "helpfully" relitigating settled
+    decisions.
+  - **Caveat on the kept `nuxt` skill**: it's generated against **Nuxt
+    5.x**, while we're on **Nuxt 4.6.3** - real differences exist (Nitro
+    v3/h3 v2, server utilities no longer auto-imported by default in v5,
+    case-sensitive typed routing, Vite 8/Rolldown). Cross-check anything
+    version-sensitive against our actual installed Nuxt version before
+    trusting it.
 
 ## Lint & format
 
