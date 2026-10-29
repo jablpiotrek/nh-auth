@@ -7,6 +7,12 @@ in" account page. Monorepo with two fully independent apps — see their own
 - [`front/CLAUDE.md`](front/CLAUDE.md) — Nuxt frontend
 - [`back/CLAUDE.md`](back/CLAUDE.md) — FastAPI backend
 
+Register/login input validation (email/password rules, error shapes) is
+documented once, by hand, in [`docs/auth-validation.md`](docs/auth-validation.md)
+— `front/` and `back/` share zero code (below), so there's no schema to
+import; keep that file in sync with `back/app/schemas/auth.py` whenever
+either changes.
+
 ## Monorepo shape
 
 `front/` (npm/Node) and `back/` (uv/Python) share zero code and use

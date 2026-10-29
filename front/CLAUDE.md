@@ -2,7 +2,10 @@
 
 Nuxt 4 app, client-side rendered only, styled with the Nordhealth (Nord)
 design system. See root [`CLAUDE.md`](../CLAUDE.md) for monorepo/deployment
-context.
+context. Register/login form validation must match
+[`../docs/auth-validation.md`](../docs/auth-validation.md) — the backend's
+actual Pydantic rules, hand-mirrored there since `front/`/`back/` share no
+code.
 
 ## Status
 

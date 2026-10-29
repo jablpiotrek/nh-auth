@@ -1,4 +1,4 @@
-.PHONY: dev db-up db-down lint lint-fix format format-check
+.PHONY: dev db-up db-down migrate test lint lint-fix format format-check
 
 dev:
 	uv run uvicorn app.main:app --reload
@@ -8,6 +8,12 @@ db-up:
 
 db-down:
 	docker compose down
+
+migrate:
+	uv run alembic upgrade head
+
+test:
+	uv run pytest
 
 lint:
 	uv run ruff check .
