@@ -38,10 +38,11 @@ per-app). This is **not** a monorepo build tool and doesn't contradict the
 "no Turborepo/Nx" decision above; it has no scripts for building or
 running either app.
 
-`.husky/pre-commit` currently only acts on `front/` (checks staged paths,
-then runs `front/`'s own `lint-staged` config from inside `front/`) since
-`back/` has no lint/format stack yet. Extend the hook similarly once it
-does.
+`.husky/pre-commit` checks staged paths and dispatches per app: `front/`
+changes run `lint-staged` (ESLint + Prettier) from inside `front/`;
+`back/*.py` changes run Ruff (`check --fix` then `format`) over `back/`.
+One hook system for the whole repo, even though each app's actual
+lint/format tooling is entirely separate (npm-based vs. Ruff/uv-based).
 
 ## Status
 

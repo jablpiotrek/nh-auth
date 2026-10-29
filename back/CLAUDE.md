@@ -12,6 +12,34 @@ endpoints, no auth yet.** Everything below this line is the *agreed design*
 for the next pass, recorded now so it doesn't have to be re-derived — it
 is not yet implemented.
 
+## Lint & format
+
+**Ruff** for both — one Rust-based tool replacing flake8/isort/Black,
+already the de facto standard for new Python projects and, notably, made
+by the same team (Astral) as `uv`. No serious case against it for this
+project: it's faster and simpler (one config, one dependency) than
+assembling flake8 + isort + Black, and its formatter is Black-compatible
+so nothing is lost by not using Black directly. Config lives in
+`pyproject.toml`'s `[tool.ruff]` / `[tool.ruff.lint]`; rule set is Ruff's
+own E/F baseline plus `I` (import sorting), `UP` (modernize syntax), `B`
+(bugbear - common bug patterns), `SIM` (simplification), `C4`
+(comprehensions) - a standard, not-overly-noisy selection.
+
+Commands: `uv run ruff check --fix .`, then `uv run ruff format .` (fix
+before format - Ruff's own documented order, since fixes can change what
+needs reformatting).
+
+**Pre-commit hook**: extends the same root `.husky/pre-commit` used by
+`front/` (one hook system for the whole repo, rather than also adopting
+Python's separate `pre-commit` framework just for this side). On any
+commit touching a `back/*.py` file, it runs `ruff check --fix` then
+`ruff format` over the whole `back/` tree (simpler than per-file
+plumbing, cheap at this project's size) and re-stages the result. If
+`ruff check` still reports an error it can't safely auto-fix, the hook
+exits non-zero and the commit is blocked, leaving the partial fix
+unstaged for manual review - verified by hand for both the clean-autofix
+and blocked-on-real-error cases.
+
 ## Library choices (and why, so they don't get silently "improved" back)
 
 - **Hashing: `argon2-cffi`** directly. *Not* `passlib` — unmaintained

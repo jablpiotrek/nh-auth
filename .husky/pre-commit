@@ -1,5 +1,10 @@
+set -e
+
 if git diff --cached --name-only --diff-filter=ACM | grep -q '^front/'; then
   (cd front && npx lint-staged)
 fi
 
-# back/ has no lint/format stack yet - add a similar check here once it does.
+if git diff --cached --name-only --diff-filter=ACM | grep -q '^back/.*\.py$'; then
+  (cd back && uv run ruff check --fix . && uv run ruff format .)
+  git add back
+fi
