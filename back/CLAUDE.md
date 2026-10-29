@@ -13,6 +13,16 @@ in-memory SQLite via a `get_db` override — no Postgres needed to run the
 suite) and by hand against local Postgres (`make db-up && make migrate &&
 make dev`).
 
+**Deployed**: live on Render (Starter, $7/mo) at `https://nh-auth.onrender.com`,
+backed by Neon Postgres. Render's own Auto-Deploy is turned **off** —
+deploys instead go through `.github/workflows/backend.yml`: on push to
+`main` touching `back/**`, it runs `uv run pytest` (with placeholder
+non-secret env vars, since tests override `get_db` with in-memory SQLite
+and never touch `Settings()`'s real values) and only `curl`s Render's
+deploy hook (repo secret `RENDER_DEPLOY_HOOK`) if that passes. See root
+[`CLAUDE.md`](../CLAUDE.md)'s Deployment/CI-CD sections for the full
+platform-choice reasoning.
+
 One deviation from the design as originally agreed, discovered while
 implementing: **`/auth/logout` identifies the caller's refresh tokens via
 the access token, not by reading the refresh cookie.** The refresh
@@ -66,10 +76,29 @@ the actual goal of this kata. `back/.env.example` reflects this:
 (trivial, non-secret credentials — this is a disposable local container,
 not anything resembling production data).
 
-**Cloud Postgres (Neon) is reserved for the actually-deployed backend**
-once `back/` is live on Railway/Render: `DATABASE_URL` set as an
-environment variable in that platform's own dashboard, never committed
-here, never needed to run or review this repo locally.
+**Cloud Postgres is Neon** (free tier, region `eu-central-1`), used only by
+the actually-deployed backend on Render. `DATABASE_URL`/`DATABASE_SSL` are
+set as environment variables in Render's own dashboard, never committed
+here, never needed to run or review this repo locally. Two things that
+needed handling beyond swapping the URL:
+- **Connection type**: Neon offers a pooled (PgBouncer) and a direct
+  connection string. We use the **direct** one — the app already manages
+  its own async connection pool via SQLAlchemy, so stacking Neon's pooler
+  on top would just add the PgBouncer prepared-statement-cache gotcha for
+  no benefit.
+- **SSL**: Neon's connection string uses `?sslmode=require&channel_binding=require`,
+  but asyncpg doesn't read `sslmode`/`channel_binding` from the URL at all
+  (those are libpq/psycopg params) — passing it through silently fails to
+  enable TLS rather than erroring. Fix: strip the query string entirely and
+  pass `connect_args={"ssl": "require"}` to `create_async_engine` instead,
+  gated on a `database_ssl: bool = False` setting (`db/session.py`,
+  `core/config.py`). Local Docker Postgres has no TLS listener, so this
+  defaults off locally and is set `DATABASE_SSL=true` only in Render's env.
+
+**Python version**: Render defaults new services to the latest Python
+(3.14 at the time of deploying), but this project is built/locked against
+**3.13**. Pinned explicitly via `back/.python-version` (Render reads this
+directly) rather than relying on the platform default staying compatible.
 
 ## Library choices (and why, so they don't get silently "improved" back)
 
@@ -110,11 +139,14 @@ here, never needed to run or review this repo locally.
   expiry — standard, accepted tradeoff.
 - **Account delete**: requires a valid access token; deletes the user row,
   cascading to their refresh-token row(s).
-- **CORS**: `front/` (Vercel) and `back/` (Railway/Render) are different
-  domains, so cross-origin cookies are required:
+- **CORS**: `front/` (Vercel) and `back/` (Render) are different domains,
+  so cross-origin cookies are required:
   `CORSMiddleware(allow_origins=[<front URL>], allow_credentials=True)` —
   no wildcard origin once credentials are involved — and the frontend must
-  send `credentials: 'include'`.
+  send `credentials: 'include'`. `CORS_ORIGIN` on Render is currently a
+  `https://CHANGE-ME.vercel.app` placeholder since `front/` isn't deployed
+  yet — **must be updated to the real Vercel URL once it is**, or the real
+  frontend's requests get blocked.
 - **Known gap, deliberately deferred**: no brute-force/rate-limiting on
   `/auth/login` yet. Keeping v1 scope to what was asked
   (register/login/logout/delete). This is a visible, intentional decision,
