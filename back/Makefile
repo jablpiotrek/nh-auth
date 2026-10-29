@@ -1,7 +1,10 @@
-.PHONY: dev db-up db-down migrate test lint lint-fix format format-check
+.PHONY: dev start db-up db-down migrate test lint lint-fix format format-check
 
 dev:
 	uv run uvicorn app.main:app --reload
+
+start:
+	uv run alembic upgrade head && uv run uvicorn app.main:app --host 0.0.0.0 --port $(PORT)
 
 db-up:
 	docker compose up -d
