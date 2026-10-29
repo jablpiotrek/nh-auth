@@ -5,6 +5,11 @@
 .nitro
 .cache
 dist
+.nuxtrc
+
+# Playwright
+test-results
+playwright-report
 
 # Node dependencies
 node_modules

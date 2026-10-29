@@ -14,7 +14,9 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "test:unit": "vitest run",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@nordhealth/components": "^5.4.4",
@@ -31,12 +33,17 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@nuxt/test-utils": "^4.3.4",
+    "@playwright/test": "^1.64.1",
     "@tailwindcss/vite": "^4.3.3",
+    "@vue/test-utils": "^2.5.1",
     "eslint-config-prettier": "^10.1.8",
+    "happy-dom": "^21.0.4",
     "lint-staged": "^17.6.0",
     "prettier": "^3.9.10",
     "prettier-plugin-tailwindcss": "^0.8.1",
-    "tailwindcss": "^4.3.3"
+    "tailwindcss": "^4.3.3",
+    "vitest": "^5.0.5"
   },
   "lint-staged": {
     "**/*.{js,mjs,cjs,ts,vue}": [

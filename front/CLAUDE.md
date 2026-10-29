@@ -19,6 +19,26 @@ getters as needed) comes with the real auth pages, not before. No
 app-specific pages or components exist yet beyond Nuxt's default
 `NuxtWelcome` — those come next.
 
+## Testing
+
+- **Unit: Vitest** + `@nuxt/test-utils`'s `mountSuspended` (not plain
+  `@vue/test-utils` alone) — `app.vue` uses Nuxt's auto-imported
+  `<NuxtWelcome>`/`<NuxtRouteAnnouncer>`, which only resolve inside Nuxt's
+  test environment. `vitest.config.ts` sets `test.environment: "nuxt"`.
+  Tests live in `tests/unit/`. Run: `npm run test:unit`.
+- **E2E: Playwright**, not Cypress — Nuxt ships first-party integration
+  (`@nuxt/test-utils/playwright`) that auto-builds and starts/stops the
+  actual Nuxt server per test file via a `goto`/`page` fixture, so there's
+  no manual `build && preview &` step in CI; it's also lighter than
+  Cypress's Electron-based runner. Tests live in `tests/e2e/`. Run:
+  `npm run test:e2e` (needs browser binaries once via
+  `npx playwright install --with-deps chromium` - the `--with-deps` system
+  package install needs passwordless `sudo`, which CI runners have but a
+  sandboxed local shell may not).
+- Both are currently placeholder "renders without erroring" checks against
+  the single default `NuxtWelcome` view — real assertions come with the
+  actual register/login/account pages.
+
 ## Key decisions
 
 - **`ssr: false`** in `nuxt.config.ts` — the task requires a client-side
