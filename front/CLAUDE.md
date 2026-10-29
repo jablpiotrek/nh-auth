@@ -94,6 +94,14 @@ app-specific pages or components exist yet beyond Nuxt's default
   `defineStore`/`storeToRefs`/etc. are auto-imported; any store placed in
   `app/stores/` would be auto-imported too, once one exists.
 
+## Node version
+
+Nuxt 4.6.3 itself requires `^22.22.3 || ^24.15.0 || >=26.0.0` (its own
+`package.json` `engines`). Pinned to the **Node 24 LTS line** specifically
+(Node 22 is now in Maintenance LTS) via `package.json`'s `engines` field
+(`^24.15.0`) and `.nvmrc` (`24.21.0`, the exact version this was built and
+tested against — `nvm use` picks it up automatically).
+
 ## Lint & format
 
 - **ESLint** (`@nuxt/eslint`) = code quality/correctness only. **Prettier**

@@ -8,7 +8,9 @@ the reasoning behind it.
 
 ## Prerequisites
 
-- **Node.js** (LTS, 20+) and **npm**
+- **Node.js 24** (LTS) and **npm** — `front/.nvmrc` pins the exact tested
+  version; `nvm use` inside `front/` picks it up. Required by Nuxt 4.6.3
+  itself (Node 20 is not supported)
 - **[uv](https://docs.astral.sh/uv/)** — manages the backend's Python
   version and dependencies itself; you don't need Python installed
   separately
