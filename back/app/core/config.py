@@ -12,4 +12,4 @@ class Settings(BaseSettings):
     cors_origin: str
 
 
-settings = Settings()
+settings = Settings()  # type: ignore[call-arg]  # fields load from .env at runtime
