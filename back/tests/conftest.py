@@ -45,4 +45,4 @@ async def client(
 
 @pytest.fixture
 def registered_user_body() -> dict[str, str]:
-    return {"email": "alice@example.com", "password": "correct-horse-battery"}
+    return {"email": "alice@example.com", "password": "Correct-Horse-9"}

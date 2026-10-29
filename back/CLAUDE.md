@@ -120,6 +120,14 @@ here, never needed to run or review this repo locally.
   (register/login/logout/delete). This is a visible, intentional decision,
   not an oversight — revisit before this goes anywhere near real users.
 
+## Input validation
+
+Email/password rules live in `app/schemas/auth.py` (Pydantic field
+constraints + `field_validator`s). They're mirrored by hand in
+[`../docs/auth-validation.md`](../docs/auth-validation.md) for `front/` to
+read, since the two apps share no code — **update that file in the same
+change** whenever `app/schemas/auth.py`'s rules change.
+
 ## Schema
 
 - `users`: `id` (uuid pk), `email` (unique, normalized lowercase),

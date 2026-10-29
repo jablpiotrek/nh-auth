@@ -42,15 +42,13 @@ async def _issue_tokens(
     "/register", response_model=AccessTokenResponse, status_code=status.HTTP_201_CREATED
 )
 async def register(body: RegisterRequest, response: Response, db: DbSession):
-    email = body.email.lower()
-
-    existing = await db.scalar(select(User).where(User.email == email))
+    existing = await db.scalar(select(User).where(User.email == body.email))
     if existing is not None:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT, detail="Email already registered"
         )
 
-    user = User(email=email, password_hash=hash_password(body.password))
+    user = User(email=body.email, password_hash=hash_password(body.password))
     db.add(user)
     await db.flush()
 
@@ -59,8 +57,7 @@ async def register(body: RegisterRequest, response: Response, db: DbSession):
 
 @router.post("/login", response_model=AccessTokenResponse)
 async def login(body: LoginRequest, response: Response, db: DbSession):
-    email = body.email.lower()
-    user = await db.scalar(select(User).where(User.email == email))
+    user = await db.scalar(select(User).where(User.email == body.email))
 
     if user is None or not verify_password(body.password, user.password_hash):
         raise HTTPException(

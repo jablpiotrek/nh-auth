@@ -1,3 +1,4 @@
+import pytest
 from httpx import AsyncClient
 
 
@@ -37,6 +38,25 @@ async def test_register_normalizes_email_case(
 async def test_register_rejects_short_password(client: AsyncClient) -> None:
     response = await client.post(
         "/auth/register", json={"email": "bob@example.com", "password": "short"}
+    )
+
+    assert response.status_code == 422
+
+
+@pytest.mark.parametrize(
+    "password",
+    [
+        "alllowercase9!",  # missing uppercase
+        "ALLUPPERCASE9!",  # missing lowercase
+        "NoDigitsHere!",  # missing digit
+        "NoSpecialChar9",  # missing special character
+    ],
+)
+async def test_register_rejects_password_missing_a_character_class(
+    client: AsyncClient, password: str
+) -> None:
+    response = await client.post(
+        "/auth/register", json={"email": "bob@example.com", "password": password}
     )
 
     assert response.status_code == 422
