@@ -5,12 +5,23 @@ FastAPI app, managed with `uv`, Python 3.13. See root
 
 ## Status
 
-Empty working scaffold only: `app/main.py` is a bare `FastAPI()` instance
-with zero routes of our own — verified by hitting the framework's
-auto-generated `/docs` and `/openapi.json`. **No database, no models, no
-endpoints, no auth yet.** Everything below this line is the *agreed design*
-for the next pass, recorded now so it doesn't have to be re-derived — it
-is not yet implemented.
+Implemented: all six endpoints (`register`/`login`/`refresh`/`logout`/
+`users/me` GET+DELETE), per the design below. Schema applied via the
+initial Alembic migration (`alembic/versions/..._create_users_and_refresh_tokens_tables.py`).
+Verified with `make test` (pytest + httpx against the real FastAPI app,
+in-memory SQLite via a `get_db` override — no Postgres needed to run the
+suite) and by hand against local Postgres (`make db-up && make migrate &&
+make dev`).
+
+One deviation from the design as originally agreed, discovered while
+implementing: **`/auth/logout` identifies the caller's refresh tokens via
+the access token, not by reading the refresh cookie.** The refresh
+cookie's `Path=/auth/refresh` scoping (deliberate, see below) means
+browsers never attach it to a `/auth/logout` request in the first place —
+so logout couldn't have looked it up that way regardless. Requiring a
+valid access token (same requirement as account deletion) and deleting
+that user's refresh-token row(s) by `user_id` is what "delete the
+caller's refresh-token row" in the design below actually resolves to.
 
 ## Lint & format
 
@@ -93,9 +104,10 @@ here, never needed to run or review this repo locally.
 - **Rotation**: every `/auth/refresh` call deletes the old refresh-token
   row and issues a new one (+ new access token). This is what makes
   logout/account-delete meaningful, since a JWT can't be un-issued.
-- **Logout**: delete the caller's refresh-token row + clear the cookie.
-  Any already-issued access token stays valid until its own short expiry —
-  standard, accepted tradeoff.
+- **Logout**: requires a valid access token (same as account delete);
+  deletes the caller's refresh-token row(s) by `user_id` and clears the
+  cookie. Any already-issued access token stays valid until its own short
+  expiry — standard, accepted tradeoff.
 - **Account delete**: requires a valid access token; deletes the user row,
   cascading to their refresh-token row(s).
 - **CORS**: `front/` (Vercel) and `back/` (Railway/Render) are different
@@ -115,7 +127,7 @@ here, never needed to run or review this repo locally.
 - `refresh_tokens`: `id` (uuid pk), `user_id` (fk, `ON DELETE CASCADE`),
   `token_hash`, `expires_at`, `created_at`.
 
-## Endpoints (planned)
+## Endpoints
 
 `POST /auth/register`, `POST /auth/login`, `POST /auth/refresh`,
 `POST /auth/logout`, `GET /users/me`, `DELETE /users/me`.
@@ -123,19 +135,20 @@ here, never needed to run or review this repo locally.
 `GET /users/me` exists specifically so `front/`'s "logged in" placeholder
 page has something real to show.
 
-## Layout (planned, grows incrementally)
+## Layout
 
 ```
 back/app/
   main.py            # FastAPI app, CORS, router registration
   core/config.py     # pydantic-settings
-  core/security.py   # argon2 hashing, PyJWT encode/decode
+  core/security.py   # argon2 hashing, PyJWT encode/decode, refresh token helpers
   db/session.py      # async engine + session factory
-  models/            # SQLAlchemy models (user, refresh_token)
-  schemas/           # Pydantic request/response models
+  models/            # SQLAlchemy models (base, user, refresh_token)
+  schemas/           # Pydantic request/response models (auth, user)
+  api/cookies.py     # refresh-token cookie set/clear helpers (shared by auth + users routes)
+  api/deps.py        # get_current_user dependency, DbSession/CurrentUser aliases
   api/routes/auth.py # register/login/refresh/logout
   api/routes/users.py# me / delete
-  api/deps.py        # get_current_user dependency
-back/alembic/
-back/tests/
+back/alembic/        # env.py wired to app.core.config + app.models.Base
+back/tests/          # pytest + httpx.AsyncClient, in-memory SQLite via get_db override
 ```
