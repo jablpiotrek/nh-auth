@@ -13,6 +13,13 @@ jobs:
     defaults:
       run:
         working-directory: back
+    env:
+      # Settings() loads these at import time even though tests override
+      # get_db with in-memory SQLite - values just need to be well-formed,
+      # not reachable. Same trivial placeholders as back/.env.example.
+      DATABASE_URL: postgresql+asyncpg://nh_auth:nh_auth@localhost:5432/nh_auth
+      JWT_SECRET_KEY: local-dev-secret-not-for-production
+      CORS_ORIGIN: http://localhost:3000
     steps:
       - uses: actions/checkout@v5
 
