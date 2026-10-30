@@ -1,11 +1,12 @@
 # nh-auth
 
-A learning/recruitment-kata project: a register/login flow plus a "logged
-in" account page. Monorepo with two fully independent apps — see their own
-`CLAUDE.md` for specifics:
+A sample register/login flow plus a "logged in" account page. Monorepo
+with two fully independent apps. For architecture, technology choices, and
+the full register/login/JWT end-to-end flow, see each app's own `README.md`;
+for the reasoning behind specific decisions, see its `CLAUDE.md`:
 
-- [`front/CLAUDE.md`](front/CLAUDE.md) — Nuxt frontend
-- [`back/CLAUDE.md`](back/CLAUDE.md) — FastAPI backend
+- [`front/README.md`](front/README.md) / [`front/CLAUDE.md`](front/CLAUDE.md) — Nuxt frontend
+- [`back/README.md`](back/README.md) / [`back/CLAUDE.md`](back/CLAUDE.md) — FastAPI backend
 
 Register/login input validation (email/password rules, error shapes) is
 documented once, by hand, in [`docs/auth-validation.md`](docs/auth-validation.md)
@@ -24,8 +25,7 @@ them separately.
 ## Deployment
 
 - **`front/`** → **Vercel**, as its own Vercel project with Root Directory
-  set to `front/`. This is Vercel's native strength (Nuxt/Nitro). *Not yet
-  deployed* — comes after `front/`'s own pages are built.
+  set to `front/`. This is Vercel's native strength (Nuxt/Nitro).
 - **`back/`** → **Render**, live at `https://nh-auth.onrender.com`, on the
   **Starter instance type ($7/month, 0.5 CPU/512MB)** — *not* Vercel's
   Python serverless runtime, and not Render's free compute tier either.
@@ -38,7 +38,7 @@ them separately.
     implementation.
   - Not Render's free tier: it spins down after 15 min idle, and the
     ~30–60s cold start on the next request is a bad first impression for
-    a recruiter opening the link cold.
+    anyone opening the link cold.
   - Not Railway (the original pick): sign-ups were disabled when we tried
     to create an account — may well be temporary, but Render was ready
     now.
@@ -110,7 +110,8 @@ person running the session.
 
 ## Status
 
-Both apps are currently empty working scaffolds (they start and do
-nothing) — no pages/components in `front/`, no endpoints/DB in `back/`.
-Feature work (the actual register/login/account pages and endpoints)
-comes next, one module at a time.
+Both apps are feature-complete for this project's scope (register, login,
+refresh, logout, account read/update) and deployed (`back/` on Render,
+`front/` on Vercel). `front.yml` CI (test-gated deploys, mirroring
+`backend.yml`) is still open. See each app's own `README.md`/`CLAUDE.md`
+for details.

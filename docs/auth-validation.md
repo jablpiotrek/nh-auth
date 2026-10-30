@@ -68,7 +68,7 @@ Custom validator failures (the four password character-class checks) are
 always `"type": "value_error"` with `msg` prefixed `"Value error, "` —
 strip that prefix if you want to show the raw message. Frontend can
 either parse `detail[].loc` to map errors onto specific form fields, or
-just show the first `msg` generically; either is fine for this kata's
+just show the first `msg` generically; either is fine for this project's
 scope.
 
 ## Wrong-credentials / auth errors (not validation)

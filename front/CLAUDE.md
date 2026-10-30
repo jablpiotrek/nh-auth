@@ -2,34 +2,33 @@
 
 Nuxt 4 app, client-side rendered only, styled with the Nordhealth (Nord)
 design system. See root [`CLAUDE.md`](../CLAUDE.md) for monorepo/deployment
-context. Register/login form validation must match
-[`../docs/auth-validation.md`](../docs/auth-validation.md) — the backend's
-actual Pydantic rules, hand-mirrored there since `front/`/`back/` share no
-code.
+context and [`README.md`](README.md) for the architecture, tech stack, and
+the full register/login/session flow end to end. This file covers _why_
+things were built the way they were, not what they do. Register/login form
+validation must match [`../docs/auth-validation.md`](../docs/auth-validation.md)
+— the backend's actual Pydantic rules, hand-mirrored there since
+`front/`/`back/` share no code.
 
 ## Status
 
-Empty working scaffold: Nuxt + CSR + Nord + Tailwind are fully wired and
-verified (build succeeds, served HTML is an empty CSR shell, bundled CSS
-contains Nord/Tailwind tokens, bundled JS registers `nord-*` elements).
-`@pinia/nuxt` is installed and registered as a module (build verified) -
-**no store exists yet**. The planned `auth` store (state: access token
-in memory, maybe current user; actions: login/register/logout/refresh;
-getters as needed) comes with the real auth pages, not before. No
-app-specific pages or components exist yet beyond Nuxt's default
-`NuxtWelcome` — those come next.
+Register, login, session bootstrap/refresh, logout, and the account page
+(with the subscription toggle) are built, wired to `back/`, and deployed —
+see `README.md` for the full flow of each. `front.yml` CI (test-gated
+deploys, mirroring `back/`'s `backend.yml`) doesn't exist yet — see root
+`CLAUDE.md`'s CI/CD section.
 
 ## Testing
 
 - **Unit: Vitest** + `@nuxt/test-utils`'s `mountSuspended` (not plain
-  `@vue/test-utils` alone) — `app.vue` uses Nuxt's auto-imported
-  `<NuxtWelcome>`/`<NuxtRouteAnnouncer>`, which only resolve inside Nuxt's
-  test environment. `vitest.config.ts` sets `test.environment: "nuxt"`.
+  `@vue/test-utils` alone) — needed for components that rely on Nuxt
+  auto-imports/composables, which only resolve inside Nuxt's test
+  environment. `vitest.config.ts` sets `test.environment: "nuxt"`.
   Tests live in `tests/nuxt/` — not `tests/unit/`: `test/nuxt`/`tests/nuxt`
   is a convention hardcoded in `@nuxt/kit` itself, so Nuxt's generated
   `tsconfig.app.json` picks the folder up (and with it the `~` alias)
   automatically, with no custom `hooks["prepare:types"]` needed. Run:
-  `npm run test:unit`.
+  `npm run test:unit`. Currently a single smoke test (`pages/login.vue`
+  renders) — not yet expanded to cover form validation/submission.
 - **E2E: Playwright**, not Cypress — Nuxt ships first-party integration
   (`@nuxt/test-utils/playwright`) that auto-builds and starts/stops the
   actual Nuxt server per test file via a `goto`/`page` fixture, so there's
@@ -38,15 +37,14 @@ app-specific pages or components exist yet beyond Nuxt's default
   `npm run test:e2e` (needs browser binaries once via
   `npx playwright install --with-deps chromium` - the `--with-deps` system
   package install needs passwordless `sudo`, which CI runners have but a
-  sandboxed local shell may not).
-- Both are currently placeholder "renders without erroring" checks against
-  the single default `NuxtWelcome` view — real assertions come with the
-  actual register/login/account pages.
+  sandboxed local shell may not). No backend runs in this suite — tests
+  stub `/auth/*` and `/users/me` with `page.route()` and drive the real UI
+  (see `README.md`'s Tests section).
 
 ## Key decisions
 
-- **`ssr: false`** in `nuxt.config.ts` — the task requires a client-side
-  only rendered app. This also sidesteps Nord's one documented Nuxt gotcha
+- **`ssr: false`** in `nuxt.config.ts` — this project is client-side
+  rendered only, by design. This also sidesteps Nord's one documented Nuxt gotcha
   (SSR hydration mismatches from components reflecting attributes to the
   light DOM) — there's no server-rendered markup to mismatch against.
 - **Custom elements**: Nord's `<nord-*>` tags are native Web Components,
@@ -118,8 +116,8 @@ app-specific pages or components exist yet beyond Nuxt's default
   `nuxt.config.ts`'s `modules` array) rather than a hand-written plugin —
   the module handles registration itself. Also installed `pinia` directly
   and `@vue/devtools-api` (a required peer dependency as of Pinia v4).
-  `defineStore`/`storeToRefs`/etc. are auto-imported; any store placed in
-  `app/stores/` would be auto-imported too, once one exists.
+  `defineStore`/`storeToRefs`/etc. are auto-imported, as are stores placed
+  in `app/stores/` (`auth.ts`, `apiError.ts` — see `README.md`).
 
 ## Node version
 
@@ -145,11 +143,3 @@ tested against — `nvm use` picks it up automatically).
   result. A real lint error (not just a formatting issue) blocks the
   commit and safely reverts any partial changes — verified by hand before
   relying on it.
-
-## Auth contract (for when the real pages land)
-
-- Access token lives **in memory** on the frontend (never `localStorage`,
-  to limit XSS blast radius).
-- Every fetch to `back/` needs `credentials: 'include'` — the refresh
-  token travels as an `httpOnly` cross-origin cookie (see
-  `back/CLAUDE.md`).

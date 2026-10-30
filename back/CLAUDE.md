@@ -1,19 +1,18 @@
 # back
 
 FastAPI app, managed with `uv`, Python 3.13. See root
-[`CLAUDE.md`](../CLAUDE.md) for monorepo/deployment context.
+[`CLAUDE.md`](../CLAUDE.md) for monorepo/deployment context and
+[`README.md`](README.md) for the architecture, DB schema, and the full
+register/login/JWT flow end to end. This file covers *why* things were
+built the way they were, not what they do.
 
 ## Status
 
-Implemented: all six endpoints (`register`/`login`/`refresh`/`logout`/
-`users/me` GET/PATCH), per the design below. Schema applied via the
-initial Alembic migration (`alembic/versions/..._create_users_and_refresh_tokens_tables.py`)
-plus a follow-up (`..._add_subscribed_to_users.py`) adding the
-`subscribed` column.
-Verified with `make test` (pytest + httpx against the real FastAPI app,
-in-memory SQLite via a `get_db` override — no Postgres needed to run the
-suite) and by hand against local Postgres (`make db-up && make migrate &&
-make dev`).
+Feature-complete for this project's scope: all six endpoints
+(`register`/`login`/`refresh`/`logout`/`users/me` GET/PATCH), schema
+applied via Alembic (`alembic/versions/`). Verified with `make test`
+(pytest + httpx against the real FastAPI app, in-memory SQLite via a
+`get_db` override) and by hand against local Postgres.
 
 **Deployed**: live on Render (Starter, $7/mo) at `https://nh-auth.onrender.com`,
 backed by Neon Postgres. Render's own Auto-Deploy is turned **off** —
@@ -24,16 +23,6 @@ and never touch `Settings()`'s real values) and only `curl`s Render's
 deploy hook (repo secret `RENDER_DEPLOY_HOOK`) if that passes. See root
 [`CLAUDE.md`](../CLAUDE.md)'s Deployment/CI-CD sections for the full
 platform-choice reasoning.
-
-One deviation from the design as originally agreed, discovered while
-implementing: **`/auth/logout` identifies the caller's refresh tokens via
-the access token, not by reading the refresh cookie.** The refresh
-cookie's `Path=/auth/refresh` scoping (deliberate, see below) means
-browsers never attach it to a `/auth/logout` request in the first place —
-so logout couldn't have looked it up that way regardless. Requiring a
-valid access token and deleting that user's refresh-token row(s) by
-`user_id` is what "delete the caller's refresh-token row" in the design
-below actually resolves to.
 
 ## Lint & format
 
@@ -73,7 +62,7 @@ database. This was a deliberate reversal of an earlier plan to use a cloud
 Postgres (Neon) for local dev too — a reviewer cloning this repo has no way
 to get a working `DATABASE_URL` for someone else's cloud database, and a
 project that doesn't start without a secret the reviewer doesn't have fails
-the actual goal of this kata. `back/.env.example` reflects this:
+the actual goal of this project. `back/.env.example` reflects this:
 `DATABASE_URL=postgresql+asyncpg://nh_auth:nh_auth@localhost:5432/nh_auth`
 (trivial, non-secret credentials — this is a disposable local container,
 not anything resembling production data).
@@ -120,37 +109,29 @@ directly) rather than relying on the platform default staying compatible.
 - **Migrations: Alembic** (standard pairing with SQLAlchemy).
 - **Tests: `pytest` + `httpx.AsyncClient`** against the FastAPI app.
 
-## Auth design ("proper, prod-ready JWT flow")
+## Auth design decisions
 
-- **Access token**: JWT, short-lived (~15 min), claims `sub` (user id),
-  `iat`, `exp`. Stateless — validated by signature + expiry only, no DB
-  hit on every request.
-- **Refresh token**: an **opaque random token**
-  (`secrets.token_urlsafe(32)`), *not* a JWT — it's validated by DB lookup
-  anyway, so there's no benefit to it being self-describing, and opaque
-  tokens are the standard choice for refresh tokens specifically. Only its
-  SHA-256 hash is stored (defense in depth if the DB ever leaks).
-  Delivered as an `httpOnly`, `Secure`, `SameSite=None` cookie, path-scoped
-  to `/auth/refresh` so it's never sent to unrelated endpoints.
-- **Rotation**: every `/auth/refresh` call deletes the old refresh-token
-  row and issues a new one (+ new access token). This is what makes
-  logout meaningful, since a JWT can't be un-issued.
-- **Logout**: requires a valid access token; deletes the caller's
-  refresh-token row(s) by `user_id` and clears the cookie. Any
-  already-issued access token stays valid until its own short expiry —
-  standard, accepted tradeoff.
-- **CORS**: `front/` (Vercel) and `back/` (Render) are different domains,
-  so cross-origin cookies are required:
-  `CORSMiddleware(allow_origins=[<front URL>], allow_credentials=True)` —
-  no wildcard origin once credentials are involved — and the frontend must
-  send `credentials: 'include'`. `CORS_ORIGIN` on Render is currently a
-  `https://CHANGE-ME.vercel.app` placeholder since `front/` isn't deployed
-  yet — **must be updated to the real Vercel URL once it is**, or the real
-  frontend's requests get blocked.
+Full JWT/refresh-token flow, schema, endpoint list, and file layout are in
+[`README.md`](README.md). Decisions worth flagging specifically:
+
+- **Refresh token is opaque, not a JWT** — it's validated by DB lookup
+  either way, so a self-describing token buys nothing, and opaque tokens
+  are the standard choice for refresh tokens specifically.
+- **Logout identifies the caller via their access token, not the refresh
+  cookie** — a deviation from the design as originally agreed, discovered
+  while implementing: the refresh cookie's `Path=/auth/refresh` scoping
+  means browsers never attach it to a `/auth/logout` request at all, so
+  logout couldn't have looked it up that way regardless.
+- **Account deletion was dropped** from scope after being originally
+  planned — no endpoint deletes a user row now; the `refresh_tokens` →
+  `users` cascade is kept as schema hygiene anyway.
+- **CORS**: `CORS_ORIGIN` on Render must exactly match `front/`'s deployed
+  origin — no wildcard is possible once `allow_credentials=True` is set,
+  and a mismatch here fails silently (blocked in the browser) rather than
+  with a clear server-side error.
 - **Known gap, deliberately deferred**: no brute-force/rate-limiting on
-  `/auth/login` yet. Keeping v1 scope to what was asked
-  (register/login/logout). This is a visible, intentional decision, not
-  an oversight — revisit before this goes anywhere near real users.
+  `/auth/login` yet. This is a visible, intentional decision, not an
+  oversight — revisit before this goes anywhere near real users.
 
 ## Input validation
 
@@ -159,47 +140,3 @@ constraints + `field_validator`s). They're mirrored by hand in
 [`../docs/auth-validation.md`](../docs/auth-validation.md) for `front/` to
 read, since the two apps share no code — **update that file in the same
 change** whenever `app/schemas/auth.py`'s rules change.
-
-## Schema
-
-- `users`: `id` (uuid pk), `email` (unique, normalized lowercase),
-  `password_hash`, `subscribed` (bool, default `false` - "send me
-  notifications" opt-in, settable at register time or later via
-  `PATCH /users/me`), `created_at`.
-- `refresh_tokens`: `id` (uuid pk), `user_id` (fk, `ON DELETE CASCADE`),
-  `token_hash`, `expires_at`, `created_at`. The cascade is kept as schema
-  hygiene (a user row deleted by any means still cleans up its tokens),
-  even though no app endpoint deletes a user row anymore (account
-  deletion was dropped — see Endpoints below).
-
-## Endpoints
-
-`POST /auth/register`, `POST /auth/login`, `POST /auth/refresh`,
-`POST /auth/logout`, `GET /users/me`, `PATCH /users/me`.
-
-**Dropped**: account deletion (`DELETE /users/me`) was removed — out of
-scope for this kata going forward. No endpoint deletes a user row now.
-
-`GET /users/me` exists specifically so `front/`'s "logged in" placeholder
-page has something real to show. `PATCH /users/me` takes the same
-`UserConfiguration` shape as `RegisterRequest.configuration`
-(`{"subscribed": bool}`) and returns the updated `UserResponse` - used by
-the account page's notifications checkbox.
-
-## Layout
-
-```
-back/app/
-  main.py            # FastAPI app, CORS, router registration
-  core/config.py     # pydantic-settings
-  core/security.py   # argon2 hashing, PyJWT encode/decode, refresh token helpers
-  db/session.py      # async engine + session factory
-  models/            # SQLAlchemy models (base, user, refresh_token)
-  schemas/           # Pydantic request/response models (auth, user)
-  api/cookies.py     # refresh-token cookie set/clear helpers (used by auth routes)
-  api/deps.py        # get_current_user dependency, DbSession/CurrentUser aliases
-  api/routes/auth.py # register/login/refresh/logout
-  api/routes/users.py# me
-back/alembic/        # env.py wired to app.core.config + app.models.Base
-back/tests/          # pytest + httpx.AsyncClient, in-memory SQLite via get_db override
-```
