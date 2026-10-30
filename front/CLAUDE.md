@@ -27,19 +27,34 @@ deploys, mirroring `back/`'s `backend.yml`) doesn't exist yet — see root
   is a convention hardcoded in `@nuxt/kit` itself, so Nuxt's generated
   `tsconfig.app.json` picks the folder up (and with it the `~` alias)
   automatically, with no custom `hooks["prepare:types"]` needed. Run:
-  `npm run test:unit`. Currently a single smoke test (`pages/login.vue`
-  renders) — not yet expanded to cover form validation/submission.
+  `npm run test:unit`. Scoped to logic and plain views: Zod schemas,
+  `useFormValidation`, the `auth` store (service layer mocked via
+  `vi.mock`), the API-error mapper, and `LogoutButton` (no Nord inputs to
+  drive, just a click handler + conditional render).
+  - **Deliberately not unit-tested: `LoginForm`/`RegisterForm`.** Nord's
+    `<nord-*>` elements are Lit web components — in Vitest's
+    `happy-dom`-backed `nuxt` environment they never upgrade, so their
+    shadow DOM (the actual `<input>`/`<button>` Nord renders internally)
+    never exists; `wrapper.find("#register-email input")` finds nothing.
+    `wrapper.html()` on a mounted form only shows the light-DOM slot
+    content Vue itself rendered (icons' `name`, slotted text) - fine for
+    a "does this render" smoke check, useless for filling in a field or
+    clicking a real button. Real browser interaction with these forms is
+    e2e's job (below), not Vitest's.
 - **E2E: Playwright**, not Cypress — Nuxt ships first-party integration
   (`@nuxt/test-utils/playwright`) that auto-builds and starts/stops the
   actual Nuxt server per test file via a `goto`/`page` fixture, so there's
   no manual `build && preview &` step in CI; it's also lighter than
-  Cypress's Electron-based runner. Tests live in `tests/e2e/`. Run:
+  Cypress's Electron-based runner. Tests live in `tests/e2e/`, one file
+  per user flow (`login`, `register`, `account`, `home`). Run:
   `npm run test:e2e` (needs browser binaries once via
   `npx playwright install --with-deps chromium` - the `--with-deps` system
   package install needs passwordless `sudo`, which CI runners have but a
   sandboxed local shell may not). No backend runs in this suite — tests
-  stub `/auth/*` and `/users/me` with `page.route()` and drive the real UI
-  (see `README.md`'s Tests section).
+  stub `/auth/*` and `/users/me` with `page.route()` and drive the real UI,
+  including filling Nord's inputs - a real browser actually upgrades the
+  custom elements, and Playwright's locators pierce their shadow DOM (see
+  `README.md`'s Tests section).
 
 ## Key decisions
 

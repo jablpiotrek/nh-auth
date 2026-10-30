@@ -22,14 +22,19 @@ instance (defaults to `http://localhost:8000`).
 ## Tests
 
 - **Unit — Vitest**: `npm run test:unit`. Uses `@nuxt/test-utils`'s
-  `mountSuspended` so Nuxt auto-imports/components resolve. Currently a
-  smoke test that `pages/login.vue` renders.
+  `mountSuspended` so Nuxt auto-imports/components resolve. Covers logic
+  and plain views in isolation, with the service layer mocked:
+  `schemas/auth.ts`, `useFormValidation`, the `auth` store, the API-error
+  mapper, and `LogoutButton`. The actual login/register forms aren't
+  unit-tested — see `CLAUDE.md` for why — that's e2e's job.
 - **E2E — Playwright**: `npm run test:e2e` (needs
   `npx playwright install --with-deps chromium` once). No backend runs in
-  this suite — `tests/e2e/home.spec.ts` stubs `/auth/login`, `/users/me`,
-  `/auth/logout` with `page.route()` and drives the real login → account
-  page → logout round trip through the actual UI, plus an
-  unauthenticated-redirect check.
+  this suite — each file under `tests/e2e/` stubs the `/auth/*` and
+  `/users/me` calls its flow needs with `page.route()` and drives the real
+  UI: `login.spec.ts` (login → account page → logout, and a wrong
+  password), `register.spec.ts` (register → success page → account page,
+  and a weak-password validation error), `account.spec.ts` (toggling the
+  notifications checkbox), `home.spec.ts` (unauthenticated redirect).
 
 ## Tech stack
 
