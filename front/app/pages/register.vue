@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { AppRoute } from "~/types/routes";
 
-definePageMeta({ title: "Create an account" });
+definePageMeta({ title: "pages.register.title" });
 
+const { t } = useI18n();
 const auth = useAuthStore();
 
 const email = ref("");
@@ -21,13 +22,13 @@ function onGoToLogin() {
 </script>
 
 <template>
-  <div class="n:flex n:min-h-screen n:items-center n:justify-center">
+  <div class="n:flex n:justify-center">
     <nord-stack class="n:max-inline-[340px] n:w-full">
       <nord-card padding="l">
         <form novalidate @submit.prevent="onRegister">
           <nord-stack>
             <nord-field>
-              <nord-field-label for="register-email">Email</nord-field-label>
+              <nord-field-label for="register-email">{{ t("common.email") }}</nord-field-label>
               <nord-input
                 id="register-email"
                 v-model="email"
@@ -39,7 +40,9 @@ function onGoToLogin() {
               />
             </nord-field>
             <nord-field>
-              <nord-field-label for="register-password">Password</nord-field-label>
+              <nord-field-label for="register-password">{{
+                t("common.password")
+              }}</nord-field-label>
               <nord-input
                 id="register-password"
                 v-model="password"
@@ -51,7 +54,9 @@ function onGoToLogin() {
               />
             </nord-field>
             <nord-field>
-              <nord-field-label for="register-repeat-password">Repeat password</nord-field-label>
+              <nord-field-label for="register-repeat-password">{{
+                t("pages.register.repeatPassword")
+              }}</nord-field-label>
               <nord-input
                 id="register-repeat-password"
                 v-model="repeatPassword"
@@ -64,11 +69,11 @@ function onGoToLogin() {
             </nord-field>
             <nord-button type="submit" variant="primary" expand>
               <nord-icon slot="start" name="user-add"></nord-icon>
-              Register
+              {{ t("pages.register.registerButton") }}
             </nord-button>
             <nord-button type="button" variant="plain" expand @click="onGoToLogin">
               <nord-icon slot="start" name="arrow-left-long"></nord-icon>
-              Back to login
+              {{ t("pages.register.backToLogin") }}
             </nord-button>
           </nord-stack>
         </form>

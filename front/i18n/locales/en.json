@@ -1,0 +1,34 @@
+{
+  "common": {
+    "email": "Email",
+    "password": "Password"
+  },
+  "pages": {
+    "login": {
+      "title": "Sign in",
+      "loginButton": "Login",
+      "registerButton": "Register"
+    },
+    "register": {
+      "title": "Create an account",
+      "repeatPassword": "Repeat password",
+      "registerButton": "Register",
+      "backToLogin": "Back to login"
+    },
+    "registerSuccess": {
+      "title": "Registration successful",
+      "message": "Your account has been created.",
+      "goToMyPage": "Go to my page"
+    },
+    "account": {
+      "title": "Your account",
+      "welcome": "Welcome {email}"
+    }
+  },
+  "layout": {
+    "logout": "Logout"
+  },
+  "footer": {
+    "language": "Language"
+  }
+}

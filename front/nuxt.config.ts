@@ -1,16 +1,13 @@
 import tailwindcss from "@tailwindcss/vite";
+import { i18nConfig } from "./i18n/config";
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-  modules: ["@nuxt/eslint", "@pinia/nuxt"],
+  modules: ["@nuxt/eslint", "@pinia/nuxt", "@nuxtjs/i18n"],
   compatibilityDate: "2025-07-15",
   devtools: { enabled: true },
 
-  app: {
-    head: {
-      htmlAttrs: { lang: "en" },
-    },
-  },
+  i18n: i18nConfig,
 
   // Task requirement: client-side only rendering, no SSR.
   ssr: false,

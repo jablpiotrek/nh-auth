@@ -1,8 +1,10 @@
 <script setup lang="ts">
 const route = useRoute();
+const { t, locale } = useI18n();
 
 useHead({
-  title: computed(() => `${route.meta.title as string} · nh-auth`),
+  htmlAttrs: { lang: locale },
+  title: computed(() => `${t(route.meta.title as string)} · nh-auth`),
 });
 </script>
 
