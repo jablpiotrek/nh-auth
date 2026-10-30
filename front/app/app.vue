@@ -1,10 +1,16 @@
 <script setup lang="ts">
-useHead({ title: "nh-auth" });
+const route = useRoute();
+
+useHead({
+  title: computed(() => `${route.meta.title as string} · nh-auth`),
+});
 </script>
 
 <template>
   <div>
     <NuxtRouteAnnouncer />
-    <NuxtWelcome />
+    <NuxtLayout>
+      <NuxtPage />
+    </NuxtLayout>
   </div>
 </template>

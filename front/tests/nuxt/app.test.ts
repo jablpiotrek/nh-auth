@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { mountSuspended } from "@nuxt/test-utils/runtime";
-import App from "~/app.vue";
+import LoginPage from "~/pages/login.vue";
 
-describe("App", () => {
+describe("LoginPage", () => {
   it("renders", async () => {
-    const wrapper = await mountSuspended(App);
+    const wrapper = await mountSuspended(LoginPage);
     expect(wrapper.html()).not.toBe("");
   });
 });
