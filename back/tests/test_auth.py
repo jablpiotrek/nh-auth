@@ -22,6 +22,33 @@ async def test_register_rejects_duplicate_email(
     assert response.status_code == 409
 
 
+async def test_register_without_configuration_defaults_to_unsubscribed(
+    client: AsyncClient, registered_user_body: dict[str, str]
+) -> None:
+    register_response = await client.post("/auth/register", json=registered_user_body)
+    access_token = register_response.json()["access_token"]
+
+    me_response = await client.get(
+        "/users/me", headers={"Authorization": f"Bearer {access_token}"}
+    )
+    assert me_response.json()["subscribed"] is False
+
+
+async def test_register_with_subscribed_true_persists_it(
+    client: AsyncClient, registered_user_body: dict[str, str]
+) -> None:
+    register_response = await client.post(
+        "/auth/register",
+        json={**registered_user_body, "configuration": {"subscribed": True}},
+    )
+    access_token = register_response.json()["access_token"]
+
+    me_response = await client.get(
+        "/users/me", headers={"Authorization": f"Bearer {access_token}"}
+    )
+    assert me_response.json()["subscribed"] is True
+
+
 async def test_register_normalizes_email_case(
     client: AsyncClient, registered_user_body: dict[str, str]
 ) -> None:

@@ -1,4 +1,4 @@
-import type { AccessTokenResponse, UserAuthRequest } from "~/types/auth";
+import type { AccessTokenResponse, RegisterRequest, UserAuthRequest } from "~/types/auth";
 
 export function login(body: UserAuthRequest) {
   const { $api } = useNuxtApp();
@@ -8,7 +8,7 @@ export function login(body: UserAuthRequest) {
   });
 }
 
-export function register(body: UserAuthRequest) {
+export function register(body: RegisterRequest) {
   const { $api } = useNuxtApp();
   return $api<AccessTokenResponse>("/auth/register", {
     method: "POST",

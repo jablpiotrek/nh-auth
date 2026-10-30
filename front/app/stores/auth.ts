@@ -1,4 +1,4 @@
-import type { UserAuthRequest } from "~/types/auth";
+import type { RegisterRequest, UserAuthRequest } from "~/types/auth";
 import {
   login as loginRequest,
   logout as logoutRequest,
@@ -16,6 +16,11 @@ export const useAuthStore = defineStore("auth", {
   state: () => ({
     accessToken: null as string | null,
     email: null as string | null,
+    // null until known - populated here optimistically on register (we
+    // know what the user just submitted) and authoritatively by the
+    // account page's own GET /users/me on every mount (covers login,
+    // where we never sent this value, and session rehydration).
+    subscribed: null as boolean | null,
   }),
   getters: {
     isLoggedIn: (state) => state.accessToken !== null,
@@ -26,11 +31,12 @@ export const useAuthStore = defineStore("auth", {
       this.accessToken = access_token;
       this.email = body.email;
     },
-    async register(body: UserAuthRequest): Promise<void> {
+    async register(body: RegisterRequest): Promise<void> {
       // Backend auto-logs-in on register, so mirror that here too.
       const { access_token } = await registerRequest(body);
       this.accessToken = access_token;
       this.email = body.email;
+      this.subscribed = body.configuration.subscribed;
     },
     async refreshSession(): Promise<void> {
       // Re-establishes accessToken from the httpOnly refresh cookie (e.g.

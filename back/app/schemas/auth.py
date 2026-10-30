@@ -2,6 +2,8 @@ import re
 
 from pydantic import BaseModel, EmailStr, Field, field_validator
 
+from app.schemas.user import UserConfiguration
+
 _UPPERCASE_RE = re.compile(r"[A-Z]")
 _LOWERCASE_RE = re.compile(r"[a-z]")
 _DIGIT_RE = re.compile(r"\d")
@@ -19,6 +21,7 @@ class _EmailModel(BaseModel):
 
 class RegisterRequest(_EmailModel):
     password: str = Field(min_length=8, max_length=128)
+    configuration: UserConfiguration = Field(default_factory=UserConfiguration)
 
     @field_validator("password")
     @classmethod

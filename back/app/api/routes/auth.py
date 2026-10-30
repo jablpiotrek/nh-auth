@@ -48,7 +48,11 @@ async def register(body: RegisterRequest, response: Response, db: DbSession):
             status_code=status.HTTP_409_CONFLICT, detail="errors.auth.emailTaken"
         )
 
-    user = User(email=body.email, password_hash=hash_password(body.password))
+    user = User(
+        email=body.email,
+        password_hash=hash_password(body.password),
+        subscribed=body.configuration.subscribed,
+    )
     db.add(user)
     await db.flush()
 

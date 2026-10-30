@@ -4,7 +4,8 @@
     "password": "Mot de passe",
     "togglePasswordVisibility": "Afficher ou masquer le mot de passe",
     "dismiss": "Fermer",
-    "loading": "Chargement"
+    "loading": "Chargement",
+    "subscribe": "M'envoyer des notifications"
   },
   "pages": {
     "login": {

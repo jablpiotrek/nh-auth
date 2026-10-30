@@ -4,7 +4,8 @@
     "password": "Password",
     "togglePasswordVisibility": "Show or hide password",
     "dismiss": "Dismiss",
-    "loading": "Loading"
+    "loading": "Loading",
+    "subscribe": "Send me notifications"
   },
   "pages": {
     "login": {

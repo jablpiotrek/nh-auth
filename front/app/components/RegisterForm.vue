@@ -8,6 +8,7 @@ const auth = useAuthStore();
 const email = ref("");
 const password = ref("");
 const repeatPassword = ref("");
+const subscribe = ref(false);
 const isSubmitting = ref(false);
 
 const { isValid, touch, touchAll, errorFor } = useFormValidation(registerSchema, () => ({
@@ -26,7 +27,11 @@ async function onRegister() {
   }
   isSubmitting.value = true;
   try {
-    await auth.register({ email: email.value.trim(), password: password.value });
+    await auth.register({
+      email: email.value.trim(),
+      password: password.value,
+      configuration: { subscribed: subscribe.value },
+    });
     await navigateTo(AppRoute.RegisterSuccess);
   } catch {
     // The api plugin already showed the global error banner.
@@ -80,6 +85,10 @@ function onGoToLogin() {
           @focusout="touch('repeatPassword')"
         />
         <nord-field-error v-if="repeatPasswordError">{{ t(repeatPasswordError) }}</nord-field-error>
+      </nord-field>
+      <nord-field orientation="horizontal">
+        <nord-checkbox id="register-subscribe" v-model="subscribe" type="checkbox"></nord-checkbox>
+        <nord-field-label for="register-subscribe">{{ t("common.subscribe") }}</nord-field-label>
       </nord-field>
       <nord-button
         type="submit"

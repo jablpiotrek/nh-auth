@@ -5,9 +5,11 @@ FastAPI app, managed with `uv`, Python 3.13. See root
 
 ## Status
 
-Implemented: all five endpoints (`register`/`login`/`refresh`/`logout`/
-`users/me` GET), per the design below. Schema applied via the
-initial Alembic migration (`alembic/versions/..._create_users_and_refresh_tokens_tables.py`).
+Implemented: all six endpoints (`register`/`login`/`refresh`/`logout`/
+`users/me` GET/PATCH), per the design below. Schema applied via the
+initial Alembic migration (`alembic/versions/..._create_users_and_refresh_tokens_tables.py`)
+plus a follow-up (`..._add_subscribed_to_users.py`) adding the
+`subscribed` column.
 Verified with `make test` (pytest + httpx against the real FastAPI app,
 in-memory SQLite via a `get_db` override — no Postgres needed to run the
 suite) and by hand against local Postgres (`make db-up && make migrate &&
@@ -161,7 +163,9 @@ change** whenever `app/schemas/auth.py`'s rules change.
 ## Schema
 
 - `users`: `id` (uuid pk), `email` (unique, normalized lowercase),
-  `password_hash`, `created_at`.
+  `password_hash`, `subscribed` (bool, default `false` - "send me
+  notifications" opt-in, settable at register time or later via
+  `PATCH /users/me`), `created_at`.
 - `refresh_tokens`: `id` (uuid pk), `user_id` (fk, `ON DELETE CASCADE`),
   `token_hash`, `expires_at`, `created_at`. The cascade is kept as schema
   hygiene (a user row deleted by any means still cleans up its tokens),
@@ -171,13 +175,16 @@ change** whenever `app/schemas/auth.py`'s rules change.
 ## Endpoints
 
 `POST /auth/register`, `POST /auth/login`, `POST /auth/refresh`,
-`POST /auth/logout`, `GET /users/me`.
+`POST /auth/logout`, `GET /users/me`, `PATCH /users/me`.
 
 **Dropped**: account deletion (`DELETE /users/me`) was removed — out of
 scope for this kata going forward. No endpoint deletes a user row now.
 
 `GET /users/me` exists specifically so `front/`'s "logged in" placeholder
-page has something real to show.
+page has something real to show. `PATCH /users/me` takes the same
+`UserConfiguration` shape as `RegisterRequest.configuration`
+(`{"subscribed": bool}`) and returns the updated `UserResponse` - used by
+the account page's notifications checkbox.
 
 ## Layout
 
