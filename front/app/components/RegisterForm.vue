@@ -8,6 +8,7 @@ const auth = useAuthStore();
 const email = ref("");
 const password = ref("");
 const repeatPassword = ref("");
+const isSubmitting = ref(false);
 
 const { isValid, touch, touchAll, errorFor } = useFormValidation(registerSchema, () => ({
   email: email.value,
@@ -23,9 +24,15 @@ async function onRegister() {
     touchAll(["email", "password", "repeatPassword"]);
     return;
   }
-  // TODO(real-endpoint): surface backend errors (409 duplicate email, 422 validation) once wired.
-  await auth.register(email.value.trim(), password.value);
-  await navigateTo(AppRoute.RegisterSuccess);
+  isSubmitting.value = true;
+  try {
+    await auth.register({ email: email.value.trim(), password: password.value });
+    await navigateTo(AppRoute.RegisterSuccess);
+  } catch {
+    // The api plugin already showed the global error banner.
+  } finally {
+    isSubmitting.value = false;
+  }
 }
 
 function onGoToLogin() {
@@ -74,11 +81,23 @@ function onGoToLogin() {
         />
         <nord-field-error v-if="repeatPasswordError">{{ t(repeatPasswordError) }}</nord-field-error>
       </nord-field>
-      <nord-button type="submit" variant="primary" expand :disabled="!isValid">
+      <nord-button
+        type="submit"
+        variant="primary"
+        expand
+        :loading="isSubmitting"
+        :disabled="isSubmitting || !isValid"
+      >
         <nord-icon slot="start" name="user-add"></nord-icon>
         {{ t("pages.register.registerButton") }}
       </nord-button>
-      <nord-button type="button" variant="plain" expand @click="onGoToLogin">
+      <nord-button
+        type="button"
+        variant="plain"
+        expand
+        :disabled="isSubmitting"
+        @click="onGoToLogin"
+      >
         <nord-icon slot="start" name="arrow-left-long"></nord-icon>
         {{ t("pages.register.backToLogin") }}
       </nord-button>

@@ -71,12 +71,22 @@ either parse `detail[].loc` to map errors onto specific form fields, or
 just show the first `msg` generically; either is fine for this kata's
 scope.
 
-## Wrong-credentials errors (not validation)
+## Wrong-credentials / auth errors (not validation)
 
-`401 Unauthorized` with `{"detail": "Incorrect email or password"}` for a
-wrong password or unknown email at `/auth/login` — deliberately the same
-message for both cases, so the frontend shouldn't try to distinguish
-"wrong password" from "no such account" from this response.
+These are raised deliberately by `back/` (not FastAPI/Pydantic's
+automatic 422 shape above), and `detail` is always an **i18n key** —
+`front/` looks it up with `t(detail)` rather than displaying it raw.
+Keys must match a `errors.*` entry in `front/i18n/locales/*.json` exactly
+— **update both sides together** whenever a key changes.
 
-`409 Conflict` with `{"detail": "Email already registered"}` from
-`/auth/register` when the (normalized) email is already taken.
+| Status | `detail`                        | Raised by                                              |
+| ------ | -------------------------------- | ------------------------------------------------------- |
+| 401    | `errors.auth.invalidCredentials` | `/auth/login` — wrong password or unknown email. Deliberately the same key for both cases, so the frontend shouldn't try to distinguish "wrong password" from "no such account". |
+| 409    | `errors.auth.emailTaken`         | `/auth/register` — the (normalized) email is already taken. |
+| 401    | `errors.auth.unauthorized`       | Any protected endpoint (`GET /users/me`, `POST /auth/logout`) — missing, malformed, or expired access token. |
+| 401    | `errors.auth.sessionExpired`     | `/auth/refresh` — missing, invalid, or expired refresh token/cookie. |
+
+If `front/` ever receives a `detail` that *isn't* a recognized key (a
+malformed response, a 500, a network failure, or the 422 validation
+shape above), it falls back to a generic, frontend-only error message
+rather than displaying something untranslated or raw.

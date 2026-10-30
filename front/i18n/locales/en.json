@@ -2,7 +2,9 @@
   "common": {
     "email": "Email",
     "password": "Password",
-    "togglePasswordVisibility": "Show or hide password"
+    "togglePasswordVisibility": "Show or hide password",
+    "dismiss": "Dismiss",
+    "loading": "Loading"
   },
   "pages": {
     "login": {
@@ -50,5 +52,14 @@
     "repeatPassword": {
       "mismatch": "Passwords do not match."
     }
+  },
+  "errors": {
+    "auth": {
+      "invalidCredentials": "Incorrect email or password.",
+      "emailTaken": "This email is already registered.",
+      "unauthorized": "You need to sign in to continue.",
+      "sessionExpired": "Your session has expired. Please sign in again."
+    },
+    "generic": "Something went wrong. Please try again."
   }
 }

@@ -2,7 +2,9 @@
   "common": {
     "email": "E-mail",
     "password": "Hasło",
-    "togglePasswordVisibility": "Pokaż lub ukryj hasło"
+    "togglePasswordVisibility": "Pokaż lub ukryj hasło",
+    "dismiss": "Zamknij",
+    "loading": "Wczytywanie"
   },
   "pages": {
     "login": {
@@ -50,5 +52,14 @@
     "repeatPassword": {
       "mismatch": "Hasła nie są identyczne."
     }
+  },
+  "errors": {
+    "auth": {
+      "invalidCredentials": "Nieprawidłowy e-mail lub hasło.",
+      "emailTaken": "Ten adres e-mail jest już zarejestrowany.",
+      "unauthorized": "Musisz się zalogować, aby kontynuować.",
+      "sessionExpired": "Twoja sesja wygasła. Zaloguj się ponownie."
+    },
+    "generic": "Coś poszło nie tak. Spróbuj ponownie."
   }
 }

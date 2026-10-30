@@ -2,7 +2,9 @@
   "common": {
     "email": "E-mail",
     "password": "Mot de passe",
-    "togglePasswordVisibility": "Afficher ou masquer le mot de passe"
+    "togglePasswordVisibility": "Afficher ou masquer le mot de passe",
+    "dismiss": "Fermer",
+    "loading": "Chargement"
   },
   "pages": {
     "login": {
@@ -50,5 +52,14 @@
     "repeatPassword": {
       "mismatch": "Les mots de passe ne correspondent pas."
     }
+  },
+  "errors": {
+    "auth": {
+      "invalidCredentials": "E-mail ou mot de passe incorrect.",
+      "emailTaken": "Cette adresse e-mail est déjà enregistrée.",
+      "unauthorized": "Vous devez vous connecter pour continuer.",
+      "sessionExpired": "Votre session a expiré. Veuillez vous reconnecter."
+    },
+    "generic": "Une erreur est survenue. Veuillez réessayer."
   }
 }

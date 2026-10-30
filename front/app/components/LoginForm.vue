@@ -7,6 +7,7 @@ const auth = useAuthStore();
 
 const email = ref("");
 const password = ref("");
+const isSubmitting = ref(false);
 
 const { isValid, touch, touchAll, errorFor } = useFormValidation(loginSchema, () => ({
   email: email.value,
@@ -20,9 +21,15 @@ async function onLogin() {
     touchAll(["email", "password"]);
     return;
   }
-  // TODO(real-endpoint): surface backend errors (401 wrong credentials, 422 validation) once wired.
-  await auth.login(email.value.trim(), password.value);
-  await navigateTo(AppRoute.Home);
+  isSubmitting.value = true;
+  try {
+    await auth.login({ email: email.value.trim(), password: password.value });
+    await navigateTo(AppRoute.Home);
+  } catch {
+    // The api plugin already showed the global error banner.
+  } finally {
+    isSubmitting.value = false;
+  }
 }
 
 function onGoToRegister() {
@@ -58,11 +65,17 @@ function onGoToRegister() {
         />
         <nord-field-error v-if="passwordError">{{ t(passwordError) }}</nord-field-error>
       </nord-field>
-      <nord-button type="submit" variant="primary" expand :disabled="!isValid">
+      <nord-button
+        type="submit"
+        variant="primary"
+        expand
+        :loading="isSubmitting"
+        :disabled="isSubmitting || !isValid"
+      >
         <nord-icon slot="start" name="interface-login"></nord-icon>
         {{ t("pages.login.loginButton") }}
       </nord-button>
-      <nord-button type="button" expand @click="onGoToRegister">
+      <nord-button type="button" expand :disabled="isSubmitting" @click="onGoToRegister">
         <nord-icon slot="start" name="user-add"></nord-icon>
         {{ t("pages.login.registerButton") }}
       </nord-button>

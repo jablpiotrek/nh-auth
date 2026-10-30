@@ -45,7 +45,7 @@ async def register(body: RegisterRequest, response: Response, db: DbSession):
     existing = await db.scalar(select(User).where(User.email == body.email))
     if existing is not None:
         raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT, detail="Email already registered"
+            status_code=status.HTTP_409_CONFLICT, detail="errors.auth.emailTaken"
         )
 
     user = User(email=body.email, password_hash=hash_password(body.password))
@@ -62,7 +62,7 @@ async def login(body: LoginRequest, response: Response, db: DbSession):
     if user is None or not verify_password(body.password, user.password_hash):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect email or password",
+            detail="errors.auth.invalidCredentials",
         )
 
     return await _issue_tokens(db, response, user)
@@ -73,7 +73,8 @@ async def refresh(request: Request, response: Response, db: DbSession):
     raw_refresh_token = request.cookies.get(REFRESH_COOKIE_NAME)
     if raw_refresh_token is None:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Missing refresh token"
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="errors.auth.sessionExpired",
         )
 
     token_hash = hash_refresh_token(raw_refresh_token)
@@ -88,14 +89,15 @@ async def refresh(request: Request, response: Response, db: DbSession):
         clear_refresh_cookie(response)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or expired refresh token",
+            detail="errors.auth.sessionExpired",
         )
 
     user = await db.get(User, token_row.user_id)
     if user is None:
         clear_refresh_cookie(response)
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token"
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="errors.auth.sessionExpired",
         )
 
     await db.delete(token_row)

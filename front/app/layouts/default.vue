@@ -1,6 +1,7 @@
 <script setup lang="ts">
 const route = useRoute();
 const { t } = useI18n();
+const apiError = useApiErrorStore();
 </script>
 
 <template>
@@ -12,6 +13,19 @@ const { t } = useI18n();
       </nord-stack>
       <LogoutButton />
     </nord-header>
+    <nord-banner v-if="apiError.errorKey" variant="danger">
+      {{ t(apiError.errorKey) }}
+      <nord-button
+        slot="actions"
+        size="s"
+        square
+        type="button"
+        :aria-label="t('common.dismiss')"
+        @click="apiError.dismiss()"
+      >
+        <nord-icon name="interface-close-small"></nord-icon>
+      </nord-button>
+    </nord-banner>
     <slot />
     <nord-footer slot="footer" size="s">
       <LocaleSwitcher />
