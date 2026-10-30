@@ -2,8 +2,15 @@ import type { UserAuthRequest } from "~/types/auth";
 import {
   login as loginRequest,
   logout as logoutRequest,
+  refresh as refreshRequest,
   register as registerRequest,
 } from "~/services/authService";
+
+// Module-level, not store state: the refresh token rotates server-side on
+// every use, so concurrent 401s must share one in-flight refresh instead
+// of each firing their own (a second parallel call would just fail since
+// the first already invalidated the cookie it was sent).
+let refreshPromise: Promise<void> | null = null;
 
 export const useAuthStore = defineStore("auth", {
   state: () => ({
@@ -24,6 +31,22 @@ export const useAuthStore = defineStore("auth", {
       const { access_token } = await registerRequest(body);
       this.accessToken = access_token;
       this.email = body.email;
+    },
+    async refreshSession(): Promise<void> {
+      // Re-establishes accessToken from the httpOnly refresh cookie (e.g.
+      // after a hard page reload, or when an in-flight request's token
+      // turned out to be expired). Email isn't known yet here - the
+      // account page's own GET /users/me call already fills that in once
+      // the user lands there.
+      if (!refreshPromise) {
+        refreshPromise = (async () => {
+          const { access_token } = await refreshRequest();
+          this.accessToken = access_token;
+        })().finally(() => {
+          refreshPromise = null;
+        });
+      }
+      return refreshPromise;
     },
     async logout(): Promise<void> {
       // Best-effort: always clear local state even if the server call

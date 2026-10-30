@@ -7,8 +7,16 @@ const isLoggingOut = ref(false);
 
 async function onLogout() {
   isLoggingOut.value = true;
-  await auth.logout();
-  await navigateTo(AppRoute.Login);
+  try {
+    await auth.logout();
+    await navigateTo(AppRoute.Login);
+  } finally {
+    // This component lives in the layout header, not the page, so it
+    // stays mounted across the logout/login cycle - v-if just hides the
+    // button below, it doesn't reset this ref. Without this, the next
+    // login would reappear stuck in the stale loading state.
+    isLoggingOut.value = false;
+  }
 }
 </script>
 
