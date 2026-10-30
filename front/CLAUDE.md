@@ -25,7 +25,11 @@ app-specific pages or components exist yet beyond Nuxt's default
   `@vue/test-utils` alone) — `app.vue` uses Nuxt's auto-imported
   `<NuxtWelcome>`/`<NuxtRouteAnnouncer>`, which only resolve inside Nuxt's
   test environment. `vitest.config.ts` sets `test.environment: "nuxt"`.
-  Tests live in `tests/unit/`. Run: `npm run test:unit`.
+  Tests live in `tests/nuxt/` — not `tests/unit/`: `test/nuxt`/`tests/nuxt`
+  is a convention hardcoded in `@nuxt/kit` itself, so Nuxt's generated
+  `tsconfig.app.json` picks the folder up (and with it the `~` alias)
+  automatically, with no custom `hooks["prepare:types"]` needed. Run:
+  `npm run test:unit`.
 - **E2E: Playwright**, not Cypress — Nuxt ships first-party integration
   (`@nuxt/test-utils/playwright`) that auto-builds and starts/stops the
   actual Nuxt server per test file via a `goto`/`page` fixture, so there's

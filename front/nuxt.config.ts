@@ -41,16 +41,4 @@ export default defineNuxtConfig({
       },
     },
   },
-
-  hooks: {
-    // Nuxt's generated tsconfig only includes the `test/nuxt` and
-    // `tests/nuxt` conventions (hardcoded in @nuxt/kit) - our unit tests
-    // live in `tests/unit/` per this app's own convention, so without
-    // this they'd fall outside any TS project and lose the `~` alias
-    // (e.g. `~/app.vue`), even though Vitest resolves it fine at runtime.
-    "prepare:types": ({ tsConfig }) => {
-      tsConfig.include ||= [];
-      tsConfig.include.push("./tests/unit/**/*");
-    },
-  },
 });
