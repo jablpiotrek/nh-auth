@@ -62,6 +62,6 @@ const apiError = useApiErrorStore();
   position: fixed;
   inset-inline: 0;
   bottom: var(--n-space-s);
-  z-index: calc(var(--n-index-top-bar, 1000) + 1);
+  z-index: var(--n-index-sticky);
 }
 </style>
