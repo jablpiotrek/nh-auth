@@ -1,7 +1,8 @@
 {
   "common": {
     "email": "E-mail",
-    "password": "Mot de passe"
+    "password": "Mot de passe",
+    "togglePasswordVisibility": "Afficher ou masquer le mot de passe"
   },
   "pages": {
     "login": {
@@ -30,5 +31,24 @@
   },
   "footer": {
     "language": "Langue"
+  },
+  "validation": {
+    "email": {
+      "required": "L'adresse e-mail est requise.",
+      "invalid": "Saisissez une adresse e-mail valide.",
+      "tooLong": "L'adresse e-mail doit comporter au maximum 254 caractères."
+    },
+    "password": {
+      "required": "Le mot de passe est requis.",
+      "tooShort": "Le mot de passe doit contenir au moins 8 caractères.",
+      "tooLong": "Le mot de passe doit comporter au maximum 128 caractères.",
+      "uppercase": "Le mot de passe doit contenir au moins une lettre majuscule.",
+      "lowercase": "Le mot de passe doit contenir au moins une lettre minuscule.",
+      "digit": "Le mot de passe doit contenir au moins un chiffre.",
+      "special": "Le mot de passe doit contenir au moins un caractère spécial."
+    },
+    "repeatPassword": {
+      "mismatch": "Les mots de passe ne correspondent pas."
+    }
   }
 }

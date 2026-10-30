@@ -3,7 +3,8 @@ const { t, locale, locales, setLocale } = useI18n();
 
 function onLocaleChange(event: Event) {
   const value = (event.target as HTMLElement & { value?: string }).value;
-  if (value) setLocale(value);
+  const match = locales.value.find((loc) => loc.code === value);
+  if (match) setLocale(match.code);
 }
 </script>
 

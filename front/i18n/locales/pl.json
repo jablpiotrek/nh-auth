@@ -1,7 +1,8 @@
 {
   "common": {
     "email": "E-mail",
-    "password": "Hasło"
+    "password": "Hasło",
+    "togglePasswordVisibility": "Pokaż lub ukryj hasło"
   },
   "pages": {
     "login": {
@@ -30,5 +31,24 @@
   },
   "footer": {
     "language": "Język"
+  },
+  "validation": {
+    "email": {
+      "required": "Adres e-mail jest wymagany.",
+      "invalid": "Podaj prawidłowy adres e-mail.",
+      "tooLong": "Adres e-mail może mieć maksymalnie 254 znaki."
+    },
+    "password": {
+      "required": "Hasło jest wymagane.",
+      "tooShort": "Hasło musi mieć co najmniej 8 znaków.",
+      "tooLong": "Hasło może mieć maksymalnie 128 znaków.",
+      "uppercase": "Hasło musi zawierać co najmniej jedną wielką literę.",
+      "lowercase": "Hasło musi zawierać co najmniej jedną małą literę.",
+      "digit": "Hasło musi zawierać co najmniej jedną cyfrę.",
+      "special": "Hasło musi zawierać co najmniej jeden znak specjalny."
+    },
+    "repeatPassword": {
+      "mismatch": "Hasła nie są identyczne."
+    }
   }
 }

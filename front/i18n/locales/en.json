@@ -1,7 +1,8 @@
 {
   "common": {
     "email": "Email",
-    "password": "Password"
+    "password": "Password",
+    "togglePasswordVisibility": "Show or hide password"
   },
   "pages": {
     "login": {
@@ -30,5 +31,24 @@
   },
   "footer": {
     "language": "Language"
+  },
+  "validation": {
+    "email": {
+      "required": "Email is required.",
+      "invalid": "Enter a valid email address.",
+      "tooLong": "Email must be at most 254 characters."
+    },
+    "password": {
+      "required": "Password is required.",
+      "tooShort": "Password must be at least 8 characters.",
+      "tooLong": "Password must be at most 128 characters.",
+      "uppercase": "Password must contain at least one uppercase letter.",
+      "lowercase": "Password must contain at least one lowercase letter.",
+      "digit": "Password must contain at least one number.",
+      "special": "Password must contain at least one special character."
+    },
+    "repeatPassword": {
+      "mismatch": "Passwords do not match."
+    }
   }
 }
