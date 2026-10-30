@@ -1,7 +1,7 @@
 # back
 
-FastAPI auth service — register/login/refresh/logout + account deletion,
-JWT access tokens with rotating opaque refresh tokens. Managed with `uv`,
+FastAPI auth service — register/login/refresh/logout, JWT access tokens
+with rotating opaque refresh tokens. Managed with `uv`,
 Python 3.13. See root [`CLAUDE.md`](../CLAUDE.md) for monorepo/deployment
 context and [`CLAUDE.md`](CLAUDE.md) for the full design rationale.
 

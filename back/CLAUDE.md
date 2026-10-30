@@ -5,8 +5,8 @@ FastAPI app, managed with `uv`, Python 3.13. See root
 
 ## Status
 
-Implemented: all six endpoints (`register`/`login`/`refresh`/`logout`/
-`users/me` GET+DELETE), per the design below. Schema applied via the
+Implemented: all five endpoints (`register`/`login`/`refresh`/`logout`/
+`users/me` GET), per the design below. Schema applied via the
 initial Alembic migration (`alembic/versions/..._create_users_and_refresh_tokens_tables.py`).
 Verified with `make test` (pytest + httpx against the real FastAPI app,
 in-memory SQLite via a `get_db` override — no Postgres needed to run the
@@ -29,9 +29,9 @@ the access token, not by reading the refresh cookie.** The refresh
 cookie's `Path=/auth/refresh` scoping (deliberate, see below) means
 browsers never attach it to a `/auth/logout` request in the first place —
 so logout couldn't have looked it up that way regardless. Requiring a
-valid access token (same requirement as account deletion) and deleting
-that user's refresh-token row(s) by `user_id` is what "delete the
-caller's refresh-token row" in the design below actually resolves to.
+valid access token and deleting that user's refresh-token row(s) by
+`user_id` is what "delete the caller's refresh-token row" in the design
+below actually resolves to.
 
 ## Lint & format
 
@@ -132,13 +132,11 @@ directly) rather than relying on the platform default staying compatible.
   to `/auth/refresh` so it's never sent to unrelated endpoints.
 - **Rotation**: every `/auth/refresh` call deletes the old refresh-token
   row and issues a new one (+ new access token). This is what makes
-  logout/account-delete meaningful, since a JWT can't be un-issued.
-- **Logout**: requires a valid access token (same as account delete);
-  deletes the caller's refresh-token row(s) by `user_id` and clears the
-  cookie. Any already-issued access token stays valid until its own short
-  expiry — standard, accepted tradeoff.
-- **Account delete**: requires a valid access token; deletes the user row,
-  cascading to their refresh-token row(s).
+  logout meaningful, since a JWT can't be un-issued.
+- **Logout**: requires a valid access token; deletes the caller's
+  refresh-token row(s) by `user_id` and clears the cookie. Any
+  already-issued access token stays valid until its own short expiry —
+  standard, accepted tradeoff.
 - **CORS**: `front/` (Vercel) and `back/` (Render) are different domains,
   so cross-origin cookies are required:
   `CORSMiddleware(allow_origins=[<front URL>], allow_credentials=True)` —
@@ -149,8 +147,8 @@ directly) rather than relying on the platform default staying compatible.
   frontend's requests get blocked.
 - **Known gap, deliberately deferred**: no brute-force/rate-limiting on
   `/auth/login` yet. Keeping v1 scope to what was asked
-  (register/login/logout/delete). This is a visible, intentional decision,
-  not an oversight — revisit before this goes anywhere near real users.
+  (register/login/logout). This is a visible, intentional decision, not
+  an oversight — revisit before this goes anywhere near real users.
 
 ## Input validation
 
@@ -165,12 +163,18 @@ change** whenever `app/schemas/auth.py`'s rules change.
 - `users`: `id` (uuid pk), `email` (unique, normalized lowercase),
   `password_hash`, `created_at`.
 - `refresh_tokens`: `id` (uuid pk), `user_id` (fk, `ON DELETE CASCADE`),
-  `token_hash`, `expires_at`, `created_at`.
+  `token_hash`, `expires_at`, `created_at`. The cascade is kept as schema
+  hygiene (a user row deleted by any means still cleans up its tokens),
+  even though no app endpoint deletes a user row anymore (account
+  deletion was dropped — see Endpoints below).
 
 ## Endpoints
 
 `POST /auth/register`, `POST /auth/login`, `POST /auth/refresh`,
-`POST /auth/logout`, `GET /users/me`, `DELETE /users/me`.
+`POST /auth/logout`, `GET /users/me`.
+
+**Dropped**: account deletion (`DELETE /users/me`) was removed — out of
+scope for this kata going forward. No endpoint deletes a user row now.
 
 `GET /users/me` exists specifically so `front/`'s "logged in" placeholder
 page has something real to show.
@@ -185,10 +189,10 @@ back/app/
   db/session.py      # async engine + session factory
   models/            # SQLAlchemy models (base, user, refresh_token)
   schemas/           # Pydantic request/response models (auth, user)
-  api/cookies.py     # refresh-token cookie set/clear helpers (shared by auth + users routes)
+  api/cookies.py     # refresh-token cookie set/clear helpers (used by auth routes)
   api/deps.py        # get_current_user dependency, DbSession/CurrentUser aliases
   api/routes/auth.py # register/login/refresh/logout
-  api/routes/users.py# me / delete
+  api/routes/users.py# me
 back/alembic/        # env.py wired to app.core.config + app.models.Base
 back/tests/          # pytest + httpx.AsyncClient, in-memory SQLite via get_db override
 ```
