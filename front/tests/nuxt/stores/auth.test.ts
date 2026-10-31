@@ -2,8 +2,10 @@ import { createPinia, setActivePinia } from "pinia";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { useAuthStore } from "~/stores/auth";
 import * as authService from "~/services/authService";
+import { confetti } from "~/utils/confetti";
 
 vi.mock("~/services/authService");
+vi.mock("~/utils/confetti");
 
 beforeEach(() => {
   setActivePinia(createPinia());
@@ -40,6 +42,37 @@ describe("auth store", () => {
 
     expect(auth.isLoggedIn).toBe(true);
     expect(auth.subscribed).toBe(true);
+  });
+
+  it("registers: fires confetti on success", async () => {
+    vi.mocked(authService.register).mockResolvedValue({
+      access_token: "token-123",
+      token_type: "bearer",
+    });
+    const auth = useAuthStore();
+
+    await auth.register({
+      email: "alice@example.com",
+      password: "Correct-Horse-9",
+      configuration: { subscribed: true },
+    });
+
+    expect(confetti).toHaveBeenCalledOnce();
+  });
+
+  it("does not fire confetti if registration fails", async () => {
+    vi.mocked(authService.register).mockRejectedValue(new Error("network error"));
+    const auth = useAuthStore();
+
+    await expect(
+      auth.register({
+        email: "alice@example.com",
+        password: "Correct-Horse-9",
+        configuration: { subscribed: true },
+      }),
+    ).rejects.toThrow();
+
+    expect(confetti).not.toHaveBeenCalled();
   });
 
   it("logs out: clears local session state once the server confirms", async () => {

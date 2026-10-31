@@ -37,6 +37,7 @@ export const useAuthStore = defineStore("auth", {
       this.accessToken = access_token;
       this.email = body.email;
       this.subscribed = body.configuration.subscribed;
+      confetti();
     },
     async refreshSession(): Promise<void> {
       // Re-establishes accessToken from the httpOnly refresh cookie (e.g.
