@@ -3,6 +3,8 @@
     "email": "Email",
     "password": "Password",
     "togglePasswordVisibility": "Show or hide password",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
     "dismiss": "Dismiss",
     "loading": "Loading",
     "subscribe": "Send me notifications"

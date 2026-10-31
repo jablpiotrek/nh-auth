@@ -3,6 +3,8 @@
     "email": "E-mail",
     "password": "Mot de passe",
     "togglePasswordVisibility": "Afficher ou masquer le mot de passe",
+    "showPassword": "Afficher le mot de passe",
+    "hidePassword": "Masquer le mot de passe",
     "dismiss": "Fermer",
     "loading": "Chargement",
     "subscribe": "M'envoyer des notifications"

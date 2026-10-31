@@ -11,6 +11,9 @@ const { t } = useI18n();
 const visible = ref(false);
 const type = computed(() => (visible.value ? "text" : "password"));
 const tooltipId = computed(() => `${props.id}-toggle-tooltip`);
+const toggleLabel = computed(() =>
+  t(visible.value ? "common.hidePassword" : "common.showPassword"),
+);
 
 function toggleVisible() {
   visible.value = !visible.value;
@@ -31,6 +34,8 @@ function toggleVisible() {
       slot="end"
       type="button"
       square
+      :aria-label="toggleLabel"
+      :aria-pressed="visible"
       :aria-describedby="tooltipId"
       @click="toggleVisible"
     >
