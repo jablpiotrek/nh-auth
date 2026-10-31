@@ -24,6 +24,7 @@ export const loginPasswordSchema = z
 
 export const registerPasswordSchema = z
   .string()
+  .min(1, "validation.password.required")
   .min(8, "validation.password.tooShort")
   .max(128, "validation.password.tooLong")
   .refine((v) => UPPERCASE_RE.test(v), "validation.password.uppercase")
