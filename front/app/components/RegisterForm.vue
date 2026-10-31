@@ -32,6 +32,8 @@ async function onRegister() {
       password: password.value,
       configuration: { subscribed: subscribe.value },
     });
+    const { confetti } = await import("~/utils/confetti");
+    confetti();
     await navigateTo(AppRoute.RegisterSuccess);
   } catch {
     // The api plugin already showed the global error banner.
