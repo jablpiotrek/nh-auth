@@ -1,5 +1,7 @@
 .PHONY: dev start db-up db-down migrate test lint lint-fix format format-check
 
+PORT ?= 8000
+
 dev:
 	uv run uvicorn app.main:app --reload
 
