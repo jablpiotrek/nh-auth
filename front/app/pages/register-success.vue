@@ -4,10 +4,6 @@ import { AppRoute } from "~/types/routes";
 definePageMeta({ title: "pages.registerSuccess.title" });
 
 const { t } = useI18n();
-
-function onGoToMyPage() {
-  navigateTo(AppRoute.Home);
-}
 </script>
 
 <template>
@@ -19,10 +15,12 @@ function onGoToMyPage() {
         color="var(--n-color-status-success)"
       ></nord-icon>
       <p>{{ t("pages.registerSuccess.message") }}</p>
-      <nord-button variant="primary" expand @click="onGoToMyPage">
-        <nord-icon slot="start" name="interface-home"></nord-icon>
-        {{ t("pages.registerSuccess.goToMyPage") }}
-      </nord-button>
+      <NuxtLink v-slot="{ href, navigate }" :to="AppRoute.Home" custom>
+        <nord-button variant="primary" expand :href="href" @click="navigate">
+          <nord-icon slot="start" name="interface-home"></nord-icon>
+          {{ t("pages.registerSuccess.goToMyPage") }}
+        </nord-button>
+      </NuxtLink>
     </nord-stack>
   </AuthFormWrapper>
 </template>

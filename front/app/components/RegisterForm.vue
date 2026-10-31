@@ -41,10 +41,6 @@ async function onRegister() {
     isSubmitting.value = false;
   }
 }
-
-function onGoToLogin() {
-  navigateTo(AppRoute.Login);
-}
 </script>
 
 <template>
@@ -102,16 +98,12 @@ function onGoToLogin() {
         <nord-icon slot="start" name="user-add"></nord-icon>
         {{ t("pages.register.registerButton") }}
       </nord-button>
-      <nord-button
-        type="button"
-        variant="plain"
-        expand
-        :disabled="isSubmitting"
-        @click="onGoToLogin"
-      >
-        <nord-icon slot="start" name="arrow-left-long"></nord-icon>
-        {{ t("pages.register.backToLogin") }}
-      </nord-button>
+      <NuxtLink v-slot="{ href, navigate }" :to="AppRoute.Login" custom>
+        <nord-button variant="plain" expand :href="href" :disabled="isSubmitting" @click="navigate">
+          <nord-icon slot="start" name="arrow-left-long"></nord-icon>
+          {{ t("pages.register.backToLogin") }}
+        </nord-button>
+      </NuxtLink>
     </nord-stack>
   </form>
 </template>

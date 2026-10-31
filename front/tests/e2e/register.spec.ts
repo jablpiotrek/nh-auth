@@ -27,7 +27,7 @@ test("registering creates an account and lands on the account page", async ({ pa
 
   await expect(page).toHaveURL(/\/register-success$/);
 
-  await page.getByRole("button", { name: "Go to my page" }).click();
+  await page.getByRole("link", { name: "Go to my page" }).click();
 
   await expect(page).toHaveURL(/\/$/);
   await expect(page.getByText("Welcome newuser@example.com")).toBeVisible();
