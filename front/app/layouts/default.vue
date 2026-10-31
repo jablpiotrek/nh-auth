@@ -2,6 +2,18 @@
 const route = useRoute();
 const { t } = useI18n();
 const apiError = useApiErrorStore();
+
+const bannerRef = ref<HTMLElement | null>(null);
+
+// Errors are set asynchronously (after a failed API call), so there's
+// nothing on screen yet for a keyboard/AT user to have tabbed to - move
+// focus to the banner itself rather than leaving it unannounced.
+watch(
+  () => apiError.errorKey,
+  (errorKey) => {
+    if (errorKey) nextTick(() => bannerRef.value?.focus());
+  },
+);
 </script>
 
 <template>
@@ -14,24 +26,31 @@ const apiError = useApiErrorStore();
       <LogoutButton />
     </nord-header>
     <main class="page-main">
+      <nord-banner
+        v-if="apiError.errorKey"
+        ref="bannerRef"
+        class="page-banner"
+        variant="danger"
+        role="alert"
+        tabindex="-1"
+      >
+        {{ t(apiError.errorKey) }}
+        <nord-button
+          slot="actions"
+          size="s"
+          square
+          type="button"
+          :aria-label="t('common.dismiss')"
+          @click="apiError.dismiss()"
+        >
+          <nord-icon name="interface-close-small"></nord-icon>
+        </nord-button>
+      </nord-banner>
       <slot />
     </main>
     <nord-footer size="s">
       <LocaleSwitcher />
     </nord-footer>
-    <nord-banner v-if="apiError.errorKey" class="page-banner" variant="danger">
-      {{ t(apiError.errorKey) }}
-      <nord-button
-        slot="actions"
-        size="s"
-        square
-        type="button"
-        :aria-label="t('common.dismiss')"
-        @click="apiError.dismiss()"
-      >
-        <nord-icon name="interface-close-small"></nord-icon>
-      </nord-button>
-    </nord-banner>
   </div>
 </template>
 
@@ -54,14 +73,10 @@ const apiError = useApiErrorStore();
   padding: var(--n-space-l);
 }
 
-/* The notification banner must stay put on screen regardless of scroll
-   position or the footer's current flow position (which, unlike before,
-   is no longer pinned to the viewport bottom on tall pages) - so it's
-   fixed to the viewport itself, independent of the footer. */
+/* Nord's own guidance is to place a banner at the top of the section it
+   applies to, not fixed to the viewport - that also keeps it right above
+   whatever triggered it (a form submit) instead of off in the corner. */
 .page-banner {
-  position: fixed;
-  inset-inline: 0;
-  bottom: var(--n-space-s);
-  z-index: var(--n-index-sticky);
+  margin-block-end: var(--n-space-l);
 }
 </style>
