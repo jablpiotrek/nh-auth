@@ -64,7 +64,11 @@ watch(
    scrolled to - when content is tall. */
 .page {
   display: flex;
+  /* dvh tracks Safari's actual visible viewport as its toolbar
+     collapses/expands; 100vh (the max-possible height) is kept first as a
+     fallback for browsers without dvh support. */
   min-height: 100vh;
+  min-height: 100dvh;
   flex-direction: column;
 }
 
