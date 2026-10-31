@@ -58,6 +58,10 @@ deploys, mirroring `back/`'s `backend.yml`) doesn't exist yet — see root
 
 ## Key decisions
 
+- **i18n: `@nuxtjs/i18n`, 3 locales (`en`/`fr`/`pl`)** — not a requirement,
+  added because all 3 are languages the author actually speaks, so there
+  was no translation cost, and it doubles as proof every user-facing
+  string is routed through `t()` rather than hardcoded.
 - **`ssr: false`** in `nuxt.config.ts` — this project is client-side
   rendered only, by design. This also sidesteps Nord's one documented Nuxt gotcha
   (SSR hydration mismatches from components reflecting attributes to the
