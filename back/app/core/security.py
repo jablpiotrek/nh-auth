@@ -11,6 +11,13 @@ from app.core.config import settings
 
 _password_hasher = PasswordHasher()
 
+# A valid hash with no corresponding user, verified against on an unknown
+# email at login so that case takes the same Argon2 time as a wrong
+# password for a real user - otherwise the early-return for "no such
+# user" is measurably faster and reopens the user-enumeration channel the
+# identical error message is meant to close.
+DUMMY_PASSWORD_HASH = PasswordHasher().hash(secrets.token_urlsafe(32))
+
 
 def hash_password(password: str) -> str:
     return _password_hasher.hash(password)

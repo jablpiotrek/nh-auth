@@ -8,6 +8,7 @@ from app.api.cookies import (
 )
 from app.api.deps import CurrentUser, DbSession
 from app.core.security import (
+    DUMMY_PASSWORD_HASH,
     create_access_token,
     generate_refresh_token,
     hash_password,
@@ -63,7 +64,11 @@ async def register(body: RegisterRequest, response: Response, db: DbSession):
 async def login(body: LoginRequest, response: Response, db: DbSession):
     user = await db.scalar(select(User).where(User.email == body.email))
 
-    if user is None or not verify_password(body.password, user.password_hash):
+    # Always run an Argon2 verify, even for an unknown email, against a
+    # fixed dummy hash - keeps this branch's timing indistinguishable
+    # from "known email, wrong password" (see DUMMY_PASSWORD_HASH).
+    password_hash = user.password_hash if user is not None else DUMMY_PASSWORD_HASH
+    if not verify_password(body.password, password_hash) or user is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="errors.auth.invalidCredentials",
