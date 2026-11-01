@@ -26,10 +26,9 @@ them separately.
 
 - **`front/`** → **Vercel**, as its own Vercel project with Root Directory
   set to `front/`. This is Vercel's native strength (Nuxt/Nitro).
-- **`back/`** → **Render**, live at `https://nh-auth.onrender.com`, on the
-  **Starter instance type ($7/month, 0.5 CPU/512MB)** — *not* Vercel's
-  Python serverless runtime, and not Render's free compute tier either.
-  Reasoning, in order of how the decision actually went:
+- **`back/`** → **Render**, on a low-end always-on compute tier — *not*
+  Vercel's Python serverless runtime, and not Render's free compute tier
+  either. Reasoning, in order of how the decision actually went:
   - Not Vercel: FastAPI's normal idiom is one async Postgres connection
     pool created at startup and reused for the app's life; that's been
     reported as unreliable on Vercel's serverless Python functions across
@@ -44,27 +43,28 @@ them separately.
     now.
   - Not FastAPI Cloud (the official FastAPI-team platform, public beta):
     its free Hobby tier is scale-to-zero only, the same cold-start problem
-    as Vercel/Render-free; always-on requires its Pro plan at $20/seat/mo,
-    more than Render Starter for the same guarantee, on unproven beta
-    infra.
+    as Vercel/Render-free; its always-on paid tier costs more than
+    Render's equivalent for the same guarantee, on unproven beta infra.
   - Render's own pricing has two separate layers that are easy to
-    conflate: a **workspace plan** (Hobby $0 / Pro $25/mo flat, account-
-    level, team features) and **per-service compute instance types**
-    (Free / Starter $7 / Standard $25 / Pro $85 /mo, etc.), billed
-    separately. Starter ($7) is available on the free Hobby workspace —
-    confirmed directly against render.com/pricing — so there was no need
-    to pay the $25 workspace fee.
+    conflate: an account-level **workspace plan** (team features) and a
+    separately-billed **per-service compute instance type**. The low-end
+    paid compute tier is available on the free workspace plan — confirmed
+    directly against Render's own pricing page — so there was no need to
+    upgrade the workspace plan just to get always-on compute.
 - **Database**: Neon Postgres (free tier), region `eu-central-1`
   (Frankfurt) — see `back/CLAUDE.md` for the connection-string/SSL details
   (asyncpg needs different handling than Neon's default connection
   string). Render's free Postgres was considered and rejected: its free
   tier **expires 30 days after creation** (then a 14-day grace period,
   then deletion) — a bad trap for a project meant to stay reviewable
-  indefinitely, and the cheapest paid tier ($6/mo) added cost without
+  indefinitely, and even Render's cheapest paid tier added cost without
   replacing Neon's free tier's reliability.
 
-Because the two apps deploy to different domains, cross-origin requests
-(cookies, CORS) matter — see `back/CLAUDE.md` for the auth cookie contract.
+`front/` and `back/` are deployed as sibling subdomains of the same parent
+domain (e.g. `app.<domain>` and `app-api.<domain>`) — different origins, so
+CORS still applies, but the same *site* for cookie purposes (see
+`back/CLAUDE.md` for what that does and doesn't relax about the auth
+cookie contract).
 
 ## CI/CD
 

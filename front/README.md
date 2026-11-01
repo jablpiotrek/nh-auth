@@ -75,14 +75,18 @@ i18n/locales/       en.json, pl.json, fr.json
   to limit the blast radius of an XSS bug. It's lost on every full page
   reload by design.
 - **Refresh token** never touches frontend code at all. `back/` sets it as
-  an `httpOnly`, `Secure`, `SameSite=None` cookie scoped to `/auth/refresh`
+  an `httpOnly`, `Secure`, `SameSite=Lax` cookie scoped to `/auth/refresh`
   — the browser attaches it automatically on refresh calls, and JavaScript
-  can't read or store it even if it wanted to.
+  can't read or store it even if it wanted to. `Lax` (rather than `None`)
+  works because `front/` and `back/` are deployed as sibling subdomains of
+  the same parent domain, which the SameSite cookie spec treats as the
+  same _site_ even though they're different origins — see `back/README.md`'s
+  "CORS & cookies" section.
 - Every backend call goes through `plugins/api.ts`'s `$api`, an `ofetch`
   instance created with `credentials: 'include'` (required for the
-  cross-origin refresh cookie to be sent/accepted at all) and an
-  `onRequest` hook that attaches `Authorization: Bearer <accessToken>`
-  whenever the store has one.
+  cross-origin refresh cookie to be sent/accepted at all, same-site or
+  not) and an `onRequest` hook that attaches `Authorization: Bearer
+<accessToken>` whenever the store has one.
 
 ## End-to-end flows
 
