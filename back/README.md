@@ -92,9 +92,11 @@ with a follow-up migration `..._add_subscribed_to_users.py` adding
   (`hash_refresh_token`) is ever persisted, so a leaked database doesn't
   hand over usable tokens directly.
 - **Delivery** — the refresh token is set as an `httpOnly`, `Secure`,
-  `SameSite=None` cookie, **path-scoped to `/auth/refresh`**
+  `SameSite=Lax` cookie, **path-scoped to `/auth/refresh`**
   (`api/cookies.py`). Browsers only ever attach it to that one endpoint —
-  it's invisible to JavaScript and to every other route.
+  it's invisible to JavaScript and to every other route. `Lax` (not
+  `None`) is possible because `front/`/`back/` are deployed as sibling
+  subdomains of the same parent domain — see "CORS & cookies" below.
 - **Rotation** — every successful `/auth/refresh` call deletes the
   consumed token row and issues a brand-new refresh token *and* access
   token (the shared `_issue_tokens()` helper in `api/routes/auth.py`, used
@@ -196,18 +198,27 @@ Supporting files: `core/config.py` (typed env settings), `api/cookies.py`
 
 ## CORS & cookies
 
-`front/` (Vercel) and `back/` (Render) are different domains, so every
-authenticated call is cross-origin:
+`front/` (Vercel) and `back/` (Render) are deployed as sibling subdomains
+of the same parent domain (e.g. `app.<domain>` / `app-api.<domain>`) —
+different origins, so every authenticated call is still cross-origin for
+CORS purposes:
 
 ```python
 CORSMiddleware(allow_origins=[settings.cors_origin], allow_credentials=True)
 ```
 
 No wildcard origin is possible once `allow_credentials=True` is set — the
-frontend must also send `credentials: 'include'` on every request. The
-refresh cookie (`httponly`, `secure`, `samesite=none`) requires HTTPS on
-both ends in any non-local environment, since browsers reject
-`SameSite=None` without `Secure`.
+frontend must also send `credentials: 'include'` on every request.
+
+Being sibling subdomains of one parent domain also makes them the same
+*site* (the SameSite cookie spec compares registrable domains, not full
+hostnames) — which is why the refresh cookie uses `samesite=lax` rather
+than `none`: a same-site `fetch` still carries a `Lax` cookie, so nothing
+about the actual request flow changes, but a genuinely cross-site request
+now gets real CSRF protection instead of `None`'s "send it everywhere."
+`secure=True` stays on regardless, since both ends run HTTPS in any
+non-local environment. If `front/`/`back/` ever moved to unrelated
+domains, the cookie would need `SameSite=None` again.
 
 ## Input validation
 

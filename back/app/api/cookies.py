@@ -1,5 +1,7 @@
 from fastapi import Response
 
+from app.core.config import settings
+
 REFRESH_COOKIE_NAME = "refresh_token"
 REFRESH_COOKIE_PATH = "/auth/refresh"
 
@@ -12,6 +14,7 @@ def set_refresh_cookie(response: Response, token: str) -> None:
         secure=True,
         samesite="none",
         path=REFRESH_COOKIE_PATH,
+        max_age=settings.refresh_token_expire_days * 24 * 60 * 60,
     )
 
 

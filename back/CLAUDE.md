@@ -14,8 +14,8 @@ applied via Alembic (`alembic/versions/`). Verified with `make test`
 (pytest + httpx against the real FastAPI app, in-memory SQLite via a
 `get_db` override) and by hand against local Postgres.
 
-**Deployed**: live on Render (Starter, $7/mo) at `https://nh-auth.onrender.com`,
-backed by Neon Postgres. Render's own Auto-Deploy is turned **off** —
+**Deployed**: live on Render's low-end always-on compute tier, backed by
+Neon Postgres. Render's own Auto-Deploy is turned **off** —
 deploys instead go through `.github/workflows/backend.yml`: on push to
 `main` touching `back/**`, it runs `uv run pytest` (with placeholder
 non-secret env vars, since tests override `get_db` with in-memory SQLite
@@ -125,10 +125,22 @@ Full JWT/refresh-token flow, schema, endpoint list, and file layout are in
 - **Account deletion was dropped** from scope after being originally
   planned — no endpoint deletes a user row now; the `refresh_tokens` →
   `users` cascade is kept as schema hygiene anyway.
-- **CORS**: `CORS_ORIGIN` on Render must exactly match `front/`'s deployed
-  origin — no wildcard is possible once `allow_credentials=True` is set,
-  and a mismatch here fails silently (blocked in the browser) rather than
-  with a clear server-side error.
+- **CORS**: `CORS_ORIGIN` must exactly match `front/`'s deployed origin —
+  no wildcard is possible once `allow_credentials=True` is set, and a
+  mismatch here fails silently (blocked in the browser) rather than with a
+  clear server-side error.
+- **Same-site deployment, by design**: `front/` and `back/` are deployed
+  as sibling subdomains of one parent domain (e.g. `app.<domain>` /
+  `app-api.<domain>`) — different origins (so CORS is still required), but
+  the same *site* as the SameSite cookie spec defines it (same
+  registrable domain, subdomains ignored). That's what lets the refresh
+  cookie use **`SameSite=Lax`** instead of `SameSite=None`
+  (`api/cookies.py`): a same-site `fetch`/XHR still carries `Lax` cookies
+  (the restriction only blocks genuinely cross-site requests), so this is
+  strictly tighter CSRF protection than `None`, not a relaxation — `None`
+  would only be required if front/back ever moved to unrelated domains.
+  `Secure` stays on regardless, since both ends are HTTPS in any non-local
+  environment.
 - **Known gap, deliberately deferred**: no brute-force/rate-limiting on
   `/auth/login` yet. This is a visible, intentional decision, not an
   oversight — revisit before this goes anywhere near real users.
