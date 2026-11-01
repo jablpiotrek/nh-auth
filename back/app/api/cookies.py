@@ -12,7 +12,7 @@ def set_refresh_cookie(response: Response, token: str) -> None:
         value=token,
         httponly=True,
         secure=True,
-        samesite="none",
+        samesite="lax",
         path=REFRESH_COOKIE_PATH,
         max_age=settings.refresh_token_expire_days * 24 * 60 * 60,
     )
@@ -23,6 +23,6 @@ def clear_refresh_cookie(response: Response) -> None:
         key=REFRESH_COOKIE_NAME,
         httponly=True,
         secure=True,
-        samesite="none",
+        samesite="lax",
         path=REFRESH_COOKIE_PATH,
     )
