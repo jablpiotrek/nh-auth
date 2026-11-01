@@ -31,7 +31,6 @@ watch(
         ref="bannerRef"
         class="page-banner"
         variant="danger"
-        role="alert"
         tabindex="-1"
       >
         {{ t(apiError.errorKey) }}
