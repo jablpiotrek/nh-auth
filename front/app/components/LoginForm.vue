@@ -16,9 +16,14 @@ const { isValid, touch, touchAll, errorFor } = useFormValidation(loginSchema, ()
 const emailError = errorFor("email");
 const passwordError = errorFor("password");
 
+const emailInputRef = ref<(HTMLElement & { focus: () => void }) | null>(null);
+const passwordInputRef = ref<{ focus: () => void } | null>(null);
+
 async function onLogin() {
   if (!isValid.value) {
     touchAll(["email", "password"]);
+    if (emailError.value) emailInputRef.value?.focus();
+    else if (passwordError.value) passwordInputRef.value?.focus();
     return;
   }
   isSubmitting.value = true;
@@ -40,6 +45,7 @@ async function onLogin() {
         <nord-field-label for="login-email">{{ t("common.email") }}</nord-field-label>
         <nord-input
           id="login-email"
+          ref="emailInputRef"
           v-model="email"
           type="email"
           name="email"
@@ -54,6 +60,7 @@ async function onLogin() {
         <nord-field-label for="login-password">{{ t("common.password") }}</nord-field-label>
         <PasswordInput
           id="login-password"
+          ref="passwordInputRef"
           v-model="password"
           name="password"
           autocomplete="current-password"

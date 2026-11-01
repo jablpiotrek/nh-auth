@@ -20,9 +20,16 @@ const emailError = errorFor("email");
 const passwordError = errorFor("password");
 const repeatPasswordError = errorFor("repeatPassword");
 
+const emailInputRef = ref<(HTMLElement & { focus: () => void }) | null>(null);
+const passwordInputRef = ref<{ focus: () => void } | null>(null);
+const repeatPasswordInputRef = ref<{ focus: () => void } | null>(null);
+
 async function onRegister() {
   if (!isValid.value) {
     touchAll(["email", "password", "repeatPassword"]);
+    if (emailError.value) emailInputRef.value?.focus();
+    else if (passwordError.value) passwordInputRef.value?.focus();
+    else if (repeatPasswordError.value) repeatPasswordInputRef.value?.focus();
     return;
   }
   isSubmitting.value = true;
@@ -50,6 +57,7 @@ async function onRegister() {
         <nord-field-label for="register-email">{{ t("common.email") }}</nord-field-label>
         <nord-input
           id="register-email"
+          ref="emailInputRef"
           v-model="email"
           type="email"
           name="email"
@@ -64,6 +72,7 @@ async function onRegister() {
         <nord-field-label for="register-password">{{ t("common.password") }}</nord-field-label>
         <PasswordInput
           id="register-password"
+          ref="passwordInputRef"
           v-model="password"
           name="password"
           autocomplete="new-password"
@@ -77,6 +86,7 @@ async function onRegister() {
         }}</nord-field-label>
         <PasswordInput
           id="register-repeat-password"
+          ref="repeatPasswordInputRef"
           v-model="repeatPassword"
           name="repeatPassword"
           autocomplete="new-password"

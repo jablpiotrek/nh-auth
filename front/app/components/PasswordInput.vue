@@ -18,11 +18,17 @@ const toggleLabel = computed(() =>
 function toggleVisible() {
   visible.value = !visible.value;
 }
+
+const inputRef = ref<(HTMLElement & { focus: () => void }) | null>(null);
+defineExpose({
+  focus: () => inputRef.value?.focus(),
+});
 </script>
 
 <template>
   <nord-input
     :id="id"
+    ref="inputRef"
     v-model="value"
     :type="type"
     :name="name"
