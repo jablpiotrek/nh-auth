@@ -18,6 +18,7 @@ import "@nordhealth/components/lib/SegmentedControl.js";
 import "@nordhealth/components/lib/SegmentedControlItem.js";
 import "@nordhealth/components/lib/Spinner.js";
 import "@nordhealth/components/lib/Stack.js";
+import "@nordhealth/components/lib/Toggle.js";
 import "@nordhealth/components/lib/Tooltip.js";
 import "@nordhealth/components/lib/VisuallyHidden.js";
 

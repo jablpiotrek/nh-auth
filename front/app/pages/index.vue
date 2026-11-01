@@ -61,12 +61,12 @@ async function onSubscribedChange(checked: boolean) {
       </i18n-t>
       <nord-stack direction="horizontal" gap="s" align-items="center">
         <nord-field orientation="horizontal">
-          <nord-checkbox
+          <nord-toggle
             id="account-subscribe"
             v-model="subscribed"
             type="checkbox"
             :disabled="isUpdatingSubscription"
-          ></nord-checkbox>
+          ></nord-toggle>
           <nord-field-label for="account-subscribe">{{ t("common.subscribe") }}</nord-field-label>
         </nord-field>
         <nord-spinner
