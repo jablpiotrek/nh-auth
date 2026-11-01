@@ -7,5 +7,6 @@ const DEFAULT_OPTIONS: Options = {
 };
 
 export function confetti(options?: Options) {
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
   return confettiFn({ ...DEFAULT_OPTIONS, ...options });
 }
