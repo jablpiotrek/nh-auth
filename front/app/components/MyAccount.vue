@@ -21,6 +21,7 @@ const { t } = useI18n();
         id="account-subscribe"
         v-model="subscribed"
         type="checkbox"
+        size="s"
         :disabled="isUpdatingSubscription"
       ></nord-toggle>
       <nord-field-label for="account-subscribe">{{ t("common.subscribe") }}</nord-field-label>
